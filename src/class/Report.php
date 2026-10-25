@@ -32,4 +32,20 @@ class mod_imforum_Report extends icms_ipf_Object {
 		$this->hideFieldFromForm(['post_id', 'reporter_uid', 'reporter_ip', 'report_time']);
 		$this->setControl('report_result', ['name' => 'yesno']);
 	}
+
+	public function getReporterLink(): string {
+		return icms_member_user_Handler::getUserLink((int) $this->getVar('reporter_uid', 'e'));
+	}
+
+	/**
+	 * Subject of the reported post, or a note that it is gone
+	 */
+	public function getPostSubject(): string {
+		$post = icms_getModuleHandler('post', IMFORUM_DIRNAME)->get((int) $this->getVar('post_id', 'e'));
+		return $post->isNew() ? _CO_IMFORUM_REPORT_POST_GONE : (string) $post->getVar('subject');
+	}
+
+	public function isOpen(): bool {
+		return (int) $this->getVar('report_result', 'e') === self::RESULT_OPEN;
+	}
 }

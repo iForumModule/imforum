@@ -79,6 +79,13 @@ final class ModuleDefinitionTest extends TestCase
 		}
 	}
 
+	public function testConfigIsAbsentOrNotEmpty(): void
+	{
+		// an empty array still sets hasconfig, which adds a Preferences link that
+		// ends on the preferences of the system module
+		self::assertTrue(!isset(self::$modversion['config']) || self::$modversion['config'] !== []);
+	}
+
 	public function testDatabaseVersionIsDefined(): void
 	{
 		// moduleUpgrade() reads it with constant() and would throw if it were missing.

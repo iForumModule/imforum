@@ -63,8 +63,11 @@ $modversion = [
 	'templates' => [
 		['file' => 'imforum_index.html', 'description' => 'Forum index'],
 		['file' => 'imforum_admin_index.html', 'description' => 'Administration index'],
+		['file' => 'imforum_admin.html', 'description' => 'Administration page'],
 	],
 
 	'blocks' => [],
-	'config' => [],
+	// No 'config' key until the module has preferences: icms_module_Object sets
+	// hasconfig for any array, even an empty one, and the admin menu then
+	// shows a Preferences link that ends on the system preferences.
 ];

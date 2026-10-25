@@ -1,6 +1,17 @@
 <div class="imforum-admin">
 	<h2><{$smarty.const._AM_IMFORUM_INDEX}></h2>
+	<{if $imforum_open_reports > 0}>
+		<p class="errorMsg">
+			<a href="<{$imforum_report_url}>"><{$smarty.const._AM_IMFORUM_OPEN_REPORTS}>: <{$imforum_open_reports}></a>
+		</p>
+	<{/if}>
 	<table class="outer">
+		<{foreach from=$imforum_stats key=label item=count}>
+			<tr>
+				<td class="head"><{$label}></td>
+				<td class="even"><{$count}></td>
+			</tr>
+		<{/foreach}>
 		<tr>
 			<td class="head"><{$smarty.const._AM_IMFORUM_VERSION}></td>
 			<td class="even"><{$imforum_version}></td>

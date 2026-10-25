@@ -23,4 +23,20 @@ class mod_imforum_Archive extends icms_ipf_Object {
 		$this->quickInitVar('post_text', XOBJ_DTYPE_TXTAREA);
 		$this->quickInitVar('archived_time', XOBJ_DTYPE_LTIME, false, '', '', 0);
 	}
+
+	public function getTopicTitle(): string {
+		$topic = icms_getModuleHandler('topic', IMFORUM_DIRNAME)->get((int) $this->getVar('topic_id', 'e'));
+		return $topic->isNew() ? '#' . (int) $this->getVar('topic_id', 'e') : (string) $topic->getVar('topic_title');
+	}
+
+	public function getExcerpt(): string {
+		return htmlspecialchars(icms_core_DataFilter::icms_substr(strip_tags((string) $this->getVar('post_text', 'n')), 0, 120), ENT_QUOTES);
+	}
+
+	/**
+	 * Admin link to read the whole archived post
+	 */
+	public function getViewLink(): string {
+		return '<a href="' . IMFORUM_URL . 'admin/archive.php?op=view&amp;archive_id=' . (int) $this->id() . '">' . _CO_IMFORUM_VIEW . '</a>';
+	}
 }
