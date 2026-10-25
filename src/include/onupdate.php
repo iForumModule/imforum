@@ -5,7 +5,10 @@
  * Order of events in the core (modules/system/admin/modulesadmin/modulesadmin.php):
  * 1. this file is included;
  * 2. moduleUpgrade($module, TRUE) creates or alters the tables of all object_items,
- *    then calls imforum_db_upgrade_<n>() for every new database version;
+ *    then calls imforum_db_upgrade_<n>() for every new database version. The core
+ *    skips this step while object_items is empty (modulesadmin.php checks
+ *    !empty()), so until phase 1 adds objects the stored dbversion stays 0 and
+ *    imforum_db_upgrade_1() first runs on the update that adds them;
  * 3. icms_module_install_imforum() or icms_module_update_imforum() runs.
  *
  * Because the tables are synchronised before the upgrade functions run, a column

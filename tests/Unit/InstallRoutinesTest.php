@@ -32,6 +32,9 @@ final class InstallRoutinesTest extends TestCase
 
 	public function testUploadFolderIsCreatedWithoutWorldWrite(): void
 	{
+		if (PHP_OS_FAMILY === 'Windows') {
+			self::markTestSkipped('Windows reports every directory as 0777');
+		}
 		self::assertTrue(imforum_create_upload_folder());
 		self::assertDirectoryExists(IMFORUM_UPLOAD_PATH);
 		self::assertSame(0, fileperms(IMFORUM_UPLOAD_PATH) & 0002, 'upload folder must not be world-writable');

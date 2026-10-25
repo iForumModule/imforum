@@ -1,0 +1,42 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Imforum\Tests\Unit;
+
+use PHPUnit\Framework\TestCase;
+
+/**
+ * Checks admin/menu.php against what icms_module_Object expects
+ */
+final class AdminMenuTest extends TestCase
+{
+	/** @var array<int, array<string, string>> */
+	private static array $adminmenu;
+
+	/** @var array<int, array<string, string>> */
+	private static array $headermenu;
+
+	public static function setUpBeforeClass(): void
+	{
+		$adminmenu = $headermenu = null;
+		include IMFORUM_TEST_MODULE_PATH . '/admin/menu.php';
+		self::$adminmenu = $adminmenu;
+		self::$headermenu = $headermenu;
+	}
+
+	public function testAdminMenuHasEntries(): void
+	{
+		self::assertNotEmpty(self::$adminmenu);
+	}
+
+	public function testHeaderMenuIsANonEmptyArray(): void
+	{
+		// displayAdminMenu() calls count() on it; null is a fatal error on PHP 8.
+		self::assertNotEmpty(self::$headermenu);
+		foreach (self::$headermenu as $item) {
+			self::assertArrayHasKey('title', $item);
+			self::assertArrayHasKey('link', $item);
+		}
+	}
+}

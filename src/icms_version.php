@@ -40,7 +40,9 @@ $modversion = [
 	'submit_bug' => 'https://github.com/iForumModule/imforum/issues',
 	'submit_feature' => 'https://github.com/iForumModule/imforum/issues',
 
-	// IPF objects, filled in phase 1. An empty array already enables IPF mode.
+	// IPF objects, filled in phase 1. An empty array already enables IPF mode
+	// (autoloading), but the core only runs the table sync and the
+	// imforum_db_upgrade_<n>() steps once the array is not empty.
 	'object_items' => [],
 
 	'onInstall' => 'include/onupdate.php',

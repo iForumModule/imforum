@@ -23,6 +23,10 @@ composer test      # PHPUnit
 ICMS_CORE_PATH=/path/to/impresscms/htdocs composer analyse   # PHPStan, needs a core checkout
 ```
 
+PHPStan reads the core classes from `ICMS_CORE_PATH`. Without that variable it stops with an error about a missing scan directory.
+
+For a local test site, copy `src/` to `modules/imforum`. A symlink or Windows junction does not work: PHP resolves `__DIR__` to the real folder, and the module takes its name from that folder.
+
 Conventions:
 
 - Classes are named `mod_imforum_<Item>` and `mod_imforum_<Item>Handler` and live in `src/class/<Item>.php` and `src/class/<Item>Handler.php`; the core autoloads them once `object_items` is set.

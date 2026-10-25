@@ -17,3 +17,11 @@ $adminmenu[] = [
 	'icon' => 'images/imforum_iconbig.png',
 	'small' => 'images/imforum_iconsmall.png',
 ];
+
+// icms_module_Object::displayAdminMenu() counts the header menu without an
+// isset check, so it must always be an array.
+$headermenu = [];
+$headermenu[] = [
+	'title' => _MI_IMFORUM_NAME,
+	'link' => ICMS_URL . '/modules/' . basename(dirname(__DIR__)) . '/',
+];
