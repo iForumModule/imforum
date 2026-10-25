@@ -28,4 +28,12 @@ class mod_imforum_Category extends icms_ipf_seo_Object {
 		$this->setControl('cat_description', ['name' => 'textarea', 'form_editor' => 'default']);
 		$this->setControl('cat_image', ['name' => 'image']);
 	}
+
+	/**
+	 * Title linked to the admin edit form, for the admin category list
+	 */
+	public function getAdminLink(): string {
+		return '<a href="' . IMFORUM_URL . 'admin/category.php?op=mod&amp;cat_id=' . (int) $this->id() . '">'
+			. $this->getVar('cat_title') . '</a>';
+	}
 }

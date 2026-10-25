@@ -65,6 +65,15 @@ class mod_imforum_ForumHandler extends icms_ipf_Handler {
 	}
 
 	/**
+	 * Options for the forum of a suspension: the forum list plus "every forum"
+	 *
+	 * @return array<int, string>
+	 */
+	public function getScopeSelectList(): array {
+		return [0 => _CO_IMFORUM_SUSPENSION_ALL_FORUMS] + $this->getForumSelectList();
+	}
+
+	/**
 	 * @param array<int, string> $options
 	 */
 	private function addTreeOptions(icms_ipf_Tree $tree, int $parent, int $depth, array &$options): void {
@@ -96,6 +105,21 @@ class mod_imforum_ForumHandler extends icms_ipf_Handler {
 	}
 
 	/**
+	 * Recount every forum in two queries; used after an import or a prune
+	 */
+	public function synchroniseAll(): bool {
+		$topics = $this->db->prefix(IMFORUM_DIRNAME . '_topic');
+		$posts = $this->db->prefix(IMFORUM_DIRNAME . '_post');
+
+		$ok = (bool) $this->db->queryF("UPDATE {$this->table} f"
+			. " LEFT JOIN (SELECT forum_id, COUNT(*) AS n FROM $topics WHERE approved = 1 GROUP BY forum_id) t ON t.forum_id = f.forum_id"
+			. ' SET f.forum_topics = COALESCE(t.n, 0)');
+		return (bool) $this->db->queryF("UPDATE {$this->table} f"
+			. " LEFT JOIN (SELECT forum_id, COUNT(*) AS n, MAX(post_id) AS last FROM $posts WHERE approved = 1 GROUP BY forum_id) p ON p.forum_id = f.forum_id"
+			. ' SET f.forum_posts = COALESCE(p.n, 0), f.forum_last_post_id = COALESCE(p.last, 0)') && $ok;
+	}
+
+	/**
 	 * @return list<int|string|null>
 	 */
 	private function fetchRow(string $sql): array {
@@ -118,6 +142,20 @@ class mod_imforum_ForumHandler extends icms_ipf_Handler {
 			$seen[$id] = true;
 		}
 		return true;
+	}
+
+	/**
+	 * Write the moderators chosen on the admin form, and recount
+	 *
+	 * The counters travel through the form as hidden fields; recounting
+	 * afterwards undoes a stale or tampered value.
+	 */
+	protected function afterSave(mod_imforum_Forum $forum): bool {
+		$forumId = (int) $forum->id();
+		$moderators = $forum->getVar('moderators', 'n');
+		$ok = !is_array($moderators)
+			|| icms_getModuleHandler('moderator', IMFORUM_DIRNAME)->setModerators($forumId, array_map('intval', $moderators));
+		return $this->synchronise($forumId) && $ok;
 	}
 
 	private function getParentId(int $forumId): int {

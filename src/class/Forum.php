@@ -39,12 +39,33 @@ class mod_imforum_Forum extends icms_ipf_seo_Object {
 
 		$this->initiateSEO();
 
+		// Not a column: the admin form edits the moderator rows through it, and
+		// ForumHandler::afterSave() writes them when it holds a list of user ids
+		$this->initNonPersistableVar('moderators', XOBJ_DTYPE_OTHER, false, '', false, null, true);
+		$this->setControl('moderators', ['name' => 'user_multi']);
+
 		$this->setControl('cat_id', ['itemHandler' => 'category', 'method' => 'getCategorySelectList', 'module' => IMFORUM_DIRNAME]);
 		$this->setControl('parent_forum', ['itemHandler' => 'forum', 'method' => 'getParentSelectList', 'module' => IMFORUM_DIRNAME]);
 		$this->setControl('forum_desc', ['name' => 'textarea', 'form_editor' => 'default']);
 		foreach (['forum_active', 'allow_html', 'allow_sig', 'allow_subject_prefix'] as $key) {
 			$this->setControl($key, ['name' => 'yesno']);
 		}
+	}
+
+	/**
+	 * Name linked to the admin edit form, for the admin forum list
+	 */
+	public function getAdminLink(): string {
+		return '<a href="' . IMFORUM_URL . 'admin/forum.php?op=mod&amp;forum_id=' . (int) $this->id() . '">'
+			. $this->getVar('forum_name') . '</a>';
+	}
+
+	/**
+	 * Category title, already escaped by icms_ipf_Handler::getList()
+	 */
+	public function getCategoryTitle(): string {
+		$titles = icms_getModuleHandler('category', IMFORUM_DIRNAME)->getCategorySelectList();
+		return (string) ($titles[(int) $this->getVar('cat_id', 'e')] ?? '');
 	}
 
 	/**

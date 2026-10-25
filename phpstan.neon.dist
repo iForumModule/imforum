@@ -23,8 +23,8 @@ parameters:
             message: '#^Parameter \#2 \$value of class icms_db_criteria_Item constructor expects string, int#'
             identifier: argument.type
         -
-            # icms_ipf_Object::initCommonVar() documents its parameters as "str"
-            message: '#^Parameter \#\d \$\w+ of method icms_ipf_Object::initCommonVar\(\) expects str, #'
+            # many core docblocks use "str" and "unknown_type", which are not types
+            message: '#^Parameter \#\d \$\w+ of (method|class) icms_\w+(::\w+\(\)| constructor) expects (str|unknown_type), #'
             identifier: argument.type
         -
             # icms_ipf_Tree::getFirstChild() documents string; the tree is keyed by integer ids

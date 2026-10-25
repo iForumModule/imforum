@@ -34,6 +34,8 @@ define('_CO_IMFORUM_FORUM_ATTACH_EXT_DSC', 'Separate extensions with |, for exam
 define('_CO_IMFORUM_FORUM_FORUM_TOPICS', 'Topics');
 define('_CO_IMFORUM_FORUM_FORUM_POSTS', 'Posts');
 define('_CO_IMFORUM_FORUM_FORUM_LAST_POST_ID', 'Last post');
+define('_CO_IMFORUM_FORUM_MODERATORS', 'Moderators');
+define('_CO_IMFORUM_FORUM_MODERATORS_DSC', 'Members who moderate this forum');
 
 // moderator
 define('_CO_IMFORUM_MODERATOR_MODERATOR_ID', 'ID');
@@ -168,3 +170,6 @@ define('_CO_IMFORUM_CATEGORY_NOT_EMPTY', 'This category still holds forums. Move
 define('_CO_IMFORUM_FORUM_NO_PARENT', 'None (top level)');
 define('_CO_IMFORUM_FORUM_PARENT_LOOP', 'A forum cannot be placed below itself or below one of its subforums.');
 define('_CO_IMFORUM_POST_NO_TOPIC', 'The topic of this post does not exist.');
+define('_CO_IMFORUM_REPORT_POST_GONE', '(post deleted)');
+define('_CO_IMFORUM_SUSPENSION_ALL_FORUMS', 'Every forum');
+define('_CO_IMFORUM_VIEW', 'View');

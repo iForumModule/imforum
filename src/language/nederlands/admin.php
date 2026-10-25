@@ -1,8 +1,70 @@
 <?php
 /**
- * Teksten voor beheer, Nederlands
+ * Beheerteksten, Nederlands
  */
 
 define('_AM_IMFORUM_INDEX', 'imforum-beheer');
 define('_AM_IMFORUM_VERSION', 'Moduleversie');
 define('_AM_IMFORUM_DBVERSION', 'Databaseversie');
+define('_AM_IMFORUM_OPEN_REPORTS', 'Open meldingen');
+define('_AM_IMFORUM_TOPICS', 'Onderwerpen');
+define('_AM_IMFORUM_POSTS', 'Berichten');
+define('_AM_IMFORUM_POST_ONLY', 'Deze actie werkt alleen vanuit het formulier.');
+define('_AM_IMFORUM_BAD_TOKEN', 'Het formulier is verlopen of komt niet van deze site. Probeer het opnieuw.');
+define('_AM_IMFORUM_CATEGORIES', 'Categorieën');
+define('_AM_IMFORUM_CATEGORIES_DSC', 'Categorieën groeperen de forums op de indexpagina. Een categorie met forums erin kan niet verwijderd worden.');
+define('_AM_IMFORUM_CATEGORY_ADD', 'Categorie toevoegen');
+define('_AM_IMFORUM_CATEGORY_EDIT', 'Categorie bewerken');
+define('_AM_IMFORUM_CATEGORY_CREATED', 'De categorie is aangemaakt.');
+define('_AM_IMFORUM_CATEGORY_MODIFIED', 'De categorie is opgeslagen.');
+define('_AM_IMFORUM_FORUMS', 'Forums');
+define('_AM_IMFORUM_FORUMS_DSC', 'Groepsrechten en moderatoren stel je in op het formulier van elk forum. Een nieuw forum begint met de groepen uit het permissiesjabloon.');
+define('_AM_IMFORUM_FORUM_ADD', 'Forum toevoegen');
+define('_AM_IMFORUM_FORUM_EDIT', 'Forum bewerken');
+define('_AM_IMFORUM_FORUM_CREATED', 'Het forum is aangemaakt.');
+define('_AM_IMFORUM_FORUM_MODIFIED', 'Het forum is opgeslagen.');
+define('_AM_IMFORUM_FORUM_NEEDS_CATEGORY', 'Maak eerst een categorie aan.');
+define('_AM_IMFORUM_FORUM_DELETE_CONFIRM', 'Het forum "%s" verwijderen, met al zijn onderwerpen, berichten en bijlagen? De subforums schuiven één niveau op. Dit kan niet ongedaan gemaakt worden.');
+define('_AM_IMFORUM_PERMTEMPLATE', 'Permissiesjabloon');
+define('_AM_IMFORUM_PERMTEMPLATE_DSC', 'De groepen die je hier kiest, staan vooraf geselecteerd op het formulier van elk nieuw forum.');
+define('_AM_IMFORUM_PERMTEMPLATE_APPLY', 'Ook toepassen op deze forums');
+define('_AM_IMFORUM_PERMTEMPLATE_APPLY_DSC', 'Vervangt alle rechten van de gekozen forums door het sjabloon.');
+define('_AM_IMFORUM_PERMTEMPLATE_SAVED', 'Het permissiesjabloon is opgeslagen.');
+define('_AM_IMFORUM_PERMTEMPLATE_ERROR', 'Het permissiesjabloon kon niet volledig opgeslagen worden.');
+define('_AM_IMFORUM_REPORTS', 'Meldingen');
+define('_AM_IMFORUM_REPORTS_DSC', 'Berichten die leden bij de moderatoren gemeld hebben. Open meldingen staan bovenaan.');
+define('_AM_IMFORUM_REPORTS_SHOW_ALL', 'Ook afgehandelde meldingen tonen');
+define('_AM_IMFORUM_REPORTS_SHOW_OPEN', 'Alleen open meldingen tonen');
+define('_AM_IMFORUM_REPORT_HANDLE', 'Melding afhandelen');
+define('_AM_IMFORUM_REPORT_MODIFIED', 'De melding is opgeslagen.');
+define('_AM_IMFORUM_SUSPENSIONS', 'Schorsingen');
+define('_AM_IMFORUM_SUSPENSIONS_DSC', 'Geschorste leden en IP-adressen kunnen lezen, maar niet posten.');
+define('_AM_IMFORUM_SUSPENSION_ADD', 'Schorsing toevoegen');
+define('_AM_IMFORUM_SUSPENSION_EDIT', 'Schorsing bewerken');
+define('_AM_IMFORUM_SUSPENSION_FORM_DSC', 'Kies een lid, een IP-adres of beide.');
+define('_AM_IMFORUM_SUSPENSION_CREATED', 'De schorsing is aangemaakt.');
+define('_AM_IMFORUM_SUSPENSION_MODIFIED', 'De schorsing is opgeslagen.');
+define('_AM_IMFORUM_DIGESTS', 'Digests');
+define('_AM_IMFORUM_DIGESTS_DSC', 'Digests die naar de abonnees gemaild zijn.');
+define('_AM_IMFORUM_DIGEST_OF', 'Digest van %s');
+define('_AM_IMFORUM_ARCHIVE', 'Archief');
+define('_AM_IMFORUM_ARCHIVE_DSC', 'Kopieën van berichten, bewaard bij het archiveren van onderwerpen.');
+define('_AM_IMFORUM_PRUNE', 'Opruimen en hertellen');
+define('_AM_IMFORUM_PRUNE_DSC', 'Verwijder onderwerpen zonder nieuwe berichten, of verplaats ze naar een ander forum. Je ziet eerst hoeveel onderwerpen het betreft.');
+define('_AM_IMFORUM_PRUNE_FORUMS', 'Forums');
+define('_AM_IMFORUM_PRUNE_DAYS', 'Geen nieuwe berichten sinds (dagen)');
+define('_AM_IMFORUM_PRUNE_KEEP_STICKY', 'Vastgezette onderwerpen behouden');
+define('_AM_IMFORUM_PRUNE_KEEP_DIGEST', 'Uitgelichte onderwerpen behouden');
+define('_AM_IMFORUM_PRUNE_MOVE_TO', 'Wat ermee gebeurt');
+define('_AM_IMFORUM_PRUNE_DELETE', 'Verwijderen');
+define('_AM_IMFORUM_PRUNE_PREVIEW', 'Toon hoeveel');
+define('_AM_IMFORUM_PRUNE_INCOMPLETE', 'Kies minstens één forum en een aantal dagen.');
+define('_AM_IMFORUM_PRUNE_NOTHING', 'Geen enkel onderwerp voldoet.');
+define('_AM_IMFORUM_PRUNE_CONFIRM_DELETE', '%d onderwerpen verwijderen, met al hun berichten en bijlagen? Dit kan niet ongedaan gemaakt worden.');
+define('_AM_IMFORUM_PRUNE_CONFIRM_MOVE', '%d onderwerpen verplaatsen naar "%s"?');
+define('_AM_IMFORUM_PRUNE_GO', 'Uitvoeren');
+define('_AM_IMFORUM_PRUNE_DONE', '%d onderwerpen verwerkt.');
+define('_AM_IMFORUM_RECOUNT', 'Hertellen');
+define('_AM_IMFORUM_RECOUNT_DSC', 'Telt de onderwerpen, berichten en laatste berichten van elk forum en onderwerp opnieuw. Handig na een import.');
+define('_AM_IMFORUM_RECOUNT_DONE', 'Alle tellers zijn bijgewerkt.');
+define('_AM_IMFORUM_RECOUNT_ERROR', 'Hertellen is mislukt.');

@@ -63,6 +63,7 @@ $modversion = [
 	'templates' => [
 		['file' => 'imforum_index.html', 'description' => 'Forum index'],
 		['file' => 'imforum_admin_index.html', 'description' => 'Administration index'],
+		['file' => 'imforum_admin.html', 'description' => 'Administration page'],
 	],
 
 	'blocks' => [],

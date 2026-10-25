@@ -15,6 +15,11 @@ define('ICMS_GROUP_ADMIN', 1);
 define('ICMS_GROUP_USERS', 2);
 define('ICMS_GROUP_ANONYMOUS', 3);
 
+// set by the core's include/common.php at runtime
+define('_GLOBAL_LEFT', 'left');
+// the _CO_ICMS_* strings of the IPF forms and tables
+require_once $core . '/modules/system/language/english/common.php';
+
 require_once dirname(__DIR__) . '/src/include/common.php';
 
 foreach (['modinfo', 'main', 'admin', 'common'] as $file) {

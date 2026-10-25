@@ -34,6 +34,8 @@ define('_CO_IMFORUM_FORUM_ATTACH_EXT_DSC', 'Scheid extensies met |, bijvoorbeeld
 define('_CO_IMFORUM_FORUM_FORUM_TOPICS', 'Onderwerpen');
 define('_CO_IMFORUM_FORUM_FORUM_POSTS', 'Berichten');
 define('_CO_IMFORUM_FORUM_FORUM_LAST_POST_ID', 'Laatste bericht');
+define('_CO_IMFORUM_FORUM_MODERATORS', 'Moderatoren');
+define('_CO_IMFORUM_FORUM_MODERATORS_DSC', 'Leden die dit forum modereren');
 
 // moderator
 define('_CO_IMFORUM_MODERATOR_MODERATOR_ID', 'ID');
@@ -168,3 +170,6 @@ define('_CO_IMFORUM_CATEGORY_NOT_EMPTY', 'Deze categorie bevat nog forums. Verpl
 define('_CO_IMFORUM_FORUM_NO_PARENT', 'Geen (hoogste niveau)');
 define('_CO_IMFORUM_FORUM_PARENT_LOOP', 'Een forum kan niet onder zichzelf of onder een van zijn subforums geplaatst worden.');
 define('_CO_IMFORUM_POST_NO_TOPIC', 'Het onderwerp van dit bericht bestaat niet.');
+define('_CO_IMFORUM_REPORT_POST_GONE', '(bericht verwijderd)');
+define('_CO_IMFORUM_SUSPENSION_ALL_FORUMS', 'Alle forums');
+define('_CO_IMFORUM_VIEW', 'Bekijken');

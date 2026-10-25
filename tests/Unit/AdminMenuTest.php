@@ -30,6 +30,17 @@ final class AdminMenuTest extends TestCase
 		self::assertNotEmpty(self::$adminmenu);
 	}
 
+	public function testEveryEntryLinksToAnExistingScriptThatShowsItsOwnTab(): void
+	{
+		foreach (self::$adminmenu as $index => $entry) {
+			$file = IMFORUM_TEST_MODULE_PATH . '/' . $entry['link'];
+			self::assertFileExists($file);
+			if ($index > 0) {
+				self::assertMatchesRegularExpression('/imforum_admin_page\\(' . $index . ',/', (string) file_get_contents($file), $entry['link']);
+			}
+		}
+	}
+
 	public function testHeaderMenuIsANonEmptyArray(): void
 	{
 		// displayAdminMenu() calls count() on it; null is a fatal error on PHP 8.

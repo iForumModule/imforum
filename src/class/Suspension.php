@@ -27,6 +27,19 @@ class mod_imforum_Suspension extends icms_ipf_Object {
 		$this->quickInitVar('description', XOBJ_DTYPE_TXTAREA);
 
 		$this->setControl('uid', ['name' => 'user']);
-		$this->setControl('forum_id', ['itemHandler' => 'forum', 'method' => 'getParentSelectList', 'module' => IMFORUM_DIRNAME]);
+		$this->setControl('forum_id', ['itemHandler' => 'forum', 'method' => 'getScopeSelectList', 'module' => IMFORUM_DIRNAME]);
+	}
+
+	public function getUserLink(): string {
+		$uid = (int) $this->getVar('uid', 'e');
+		return $uid > 0 ? icms_member_user_Handler::getUserLink($uid) : '';
+	}
+
+	/**
+	 * Forum name, already escaped, or "every forum" for forum_id 0
+	 */
+	public function getForumName(): string {
+		$forums = icms_getModuleHandler('forum', IMFORUM_DIRNAME)->getScopeSelectList();
+		return $forums[(int) $this->getVar('forum_id', 'e')] ?? '';
 	}
 }
