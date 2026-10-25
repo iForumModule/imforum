@@ -1,0 +1,42 @@
+<table class="outer imforum-topics">
+	<thead>
+		<tr>
+			<th class="head" colspan="2"><{$smarty.const._MD_IMFORUM_TOPIC}></th>
+			<th class="head imforum-num"><{$smarty.const._MD_IMFORUM_REPLIES}></th>
+			<th class="head imforum-num"><{$smarty.const._MD_IMFORUM_VIEWS}></th>
+			<th class="head"><{$smarty.const._MD_IMFORUM_LAST_POST}></th>
+		</tr>
+	</thead>
+	<tbody>
+	<{foreach from=$imforum_topics item=topic}>
+		<tr class="<{cycle values="even,odd"}><{if $topic.unread}> imforum-unread<{/if}>">
+			<td class="imforum-flags">
+				<{if $topic.unread}><span title="<{$smarty.const._MD_IMFORUM_UNREAD}>">&#9679;</span>
+				<{elseif $topic.locked}><span title="<{$smarty.const._MD_IMFORUM_LOCKED}>">&#128274;</span>
+				<{else}><span class="imforum-read">&#9675;</span><{/if}>
+			</td>
+			<td>
+				<{if $topic.sticky}><span class="imforum-badge"><{$smarty.const._MD_IMFORUM_STICKY}></span><{/if}>
+				<{if $topic.digest}><span class="imforum-badge"><{$smarty.const._MD_IMFORUM_FEATURED}></span><{/if}>
+				<{if $topic.hot}><span class="imforum-badge"><{$smarty.const._MD_IMFORUM_HOT}></span><{/if}>
+				<a href="<{$topic.url}>"><{$topic.title}></a>
+				<{if $topic.pages}>
+					<span class="imforum-pages">[<{foreach from=$topic.pages item=page}><a href="<{$page.url}>"><{$page.number}></a> <{/foreach}><{if $topic.more_pages}>&hellip;<{/if}>]</span>
+				<{/if}>
+				<div class="imforum-meta">
+					<{$smarty.const._MD_IMFORUM_BY}> <{$topic.poster}>, <{$topic.time}>
+					<{if $topic.forum}> &middot; <a href="<{$topic.forum.url}>"><{$topic.forum.name}></a><{/if}>
+				</div>
+			</td>
+			<td class="imforum-num"><{$topic.replies}></td>
+			<td class="imforum-num"><{$topic.views}></td>
+			<td class="imforum-last">
+				<{if $topic.last}>
+					<a href="<{$topic.last_url}>"><{$topic.last.time}></a>
+					<div class="imforum-meta"><{$smarty.const._MD_IMFORUM_BY}> <{$topic.last.poster}></div>
+				<{/if}>
+			</td>
+		</tr>
+	<{/foreach}>
+	</tbody>
+</table>

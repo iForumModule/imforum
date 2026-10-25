@@ -1,0 +1,13 @@
+<{if $imforum_online}>
+<div class="imforum-online">
+	<h3><{$smarty.const._MD_IMFORUM_ONLINE}></h3>
+	<p>
+		<{$imforum_online.member_count}> <{$smarty.const._MD_IMFORUM_ONLINE_MEMBERS}>,
+		<{$imforum_online.guests}> <{$smarty.const._MD_IMFORUM_ONLINE_GUESTS}>
+		<{if $imforum_online.members}>
+			&mdash;
+			<{foreach from=$imforum_online.members item=member name=online}><a href="<{$member.url}>"><{$member.name}></a><{if !$smarty.foreach.online.last}>, <{/if}><{/foreach}>
+		<{/if}>
+	</p>
+</div>
+<{/if}>

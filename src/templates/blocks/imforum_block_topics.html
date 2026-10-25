@@ -1,0 +1,9 @@
+<ul class="imforum-block">
+	<{foreach from=$block.topics item=topic}>
+	<li>
+		<a href="<{$topic.url}>"><{$topic.title}></a>
+		<span class="imforum-meta"><{$topic.forum}> &middot; <{$topic.replies}> <{$smarty.const._MD_IMFORUM_REPLIES}> &middot; <{$topic.time}></span>
+	</li>
+	<{/foreach}>
+</ul>
+<p class="imforum-block-more"><a href="<{$block.all_url}>"><{$smarty.const._MD_IMFORUM_VIEWALL_LATEST}></a></p>

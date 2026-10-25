@@ -1,0 +1,47 @@
+<div class="imforum">
+	<{include file="db:imforum_breadcrumb.html"}>
+	<{if $imforum_archive_topic}>
+		<h1><{$imforum_archive_topic.title}></h1>
+		<p><a href="<{$imforum_archive_topic.url}>"><{$smarty.const._MD_IMFORUM_TO_TOPIC}></a></p>
+		<{foreach from=$imforum_archive_posts item=post}>
+		<div class="imforum-post" id="post-<{$post.id}>">
+			<div class="imforum-post-head">
+				<strong><{$post.subject}></strong>
+				<span class="imforum-meta"><{if $post.author}><{$smarty.const._MD_IMFORUM_BY}> <{$post.author}>, <{$post.time}> &middot; <{/if}><{$smarty.const._MD_IMFORUM_ARCHIVED_ON}> <{$post.archived}></span>
+			</div>
+			<div class="imforum-post-text">
+				<{if $post.lock}>
+					<p class="imforum-notice"><{if $post.lock == 'karma'}><{$smarty.const._MD_IMFORUM_LOCK_KARMA}><{else}><{$smarty.const._MD_IMFORUM_LOCK_REPLY}><{/if}></p>
+				<{else}>
+					<{$post.text}>
+				<{/if}>
+			</div>
+		</div>
+		<{/foreach}>
+	<{else}>
+		<h1><{$smarty.const._MD_IMFORUM_ARCHIVE}></h1>
+		<p class="imforum-meta"><{$smarty.const._MD_IMFORUM_ARCHIVE_DSC}></p>
+		<{if $imforum_archive_topics}>
+			<{$imforum_pager}>
+			<table class="outer imforum-topics">
+				<thead><tr>
+					<th class="head"><{$smarty.const._MD_IMFORUM_TOPIC}></th>
+					<th class="head imforum-num"><{$smarty.const._MD_IMFORUM_POSTS}></th>
+					<th class="head"><{$smarty.const._MD_IMFORUM_ARCHIVED_ON}></th>
+				</tr></thead>
+				<tbody>
+				<{foreach from=$imforum_archive_topics item=topic}>
+					<tr class="<{cycle values="odd,even"}>">
+						<td><a href="<{$topic.url}>"><{$topic.title}></a></td>
+						<td class="imforum-num"><{$topic.posts}></td>
+						<td><{$topic.archived}></td>
+					</tr>
+				<{/foreach}>
+				</tbody>
+			</table>
+			<{$imforum_pager}>
+		<{else}>
+			<p><{$smarty.const._MD_IMFORUM_ARCHIVE_EMPTY}></p>
+		<{/if}>
+	<{/if}>
+</div>

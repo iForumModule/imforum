@@ -94,6 +94,121 @@ class mod_imforum_TopicHandler extends icms_ipf_Handler {
 		return $forumHandler->synchronise($oldForumId) && $ok;
 	}
 
+	/**
+	 * One page of the approved topics of a forum: sticky topics first, then by last post
+	 *
+	 * @return array<int, mod_imforum_Topic> by topic id
+	 */
+	public function getForumTopics(int $forumId, int $start, int $limit): array {
+		$criteria = $this->approvedInForum($forumId);
+		$criteria->setSort('topic_sticky DESC, topic_last_post_id');
+		$criteria->setOrder('DESC');
+		$criteria->setStart($start);
+		$criteria->setLimit($limit);
+		return $this->getObjects($criteria, true);
+	}
+
+	public function countForumTopics(int $forumId): int {
+		return (int) $this->getCount($this->approvedInForum($forumId));
+	}
+
+	private function approvedInForum(int $forumId): icms_db_criteria_Compo {
+		$criteria = new icms_db_criteria_Compo(new icms_db_criteria_Item('forum_id', $forumId));
+		$criteria->add(new icms_db_criteria_Item('approved', 1));
+		return $criteria;
+	}
+
+	/**
+	 * Topics by id, in the order of the ids; unknown ids are left out
+	 *
+	 * @param list<int> $topicIds
+	 * @return array<int, mod_imforum_Topic>
+	 */
+	public function getByIds(array $topicIds): array {
+		$topicIds = array_values(array_filter(array_map('intval', $topicIds)));
+		if (!$topicIds) {
+			return [];
+		}
+		$found = $this->getObjects(new icms_db_criteria_Item('topic_id', '(' . implode(',', $topicIds) . ')', 'IN'), true);
+		$ordered = [];
+		foreach ($topicIds as $topicId) {
+			if (isset($found[$topicId])) {
+				$ordered[$topicId] = $found[$topicId];
+			}
+		}
+		return $ordered;
+	}
+
+	/**
+	 * Topics over several forums, newest activity first
+	 *
+	 * @param list<int> $forumIds the forums to look in; already limited to what the reader may open
+	 * @param string $filter '' for all, 'unread' for what the member has not read, 'digest' for featured topics
+	 * @return array{ids: list<int>, total: int}
+	 */
+	public function findRecent(array $forumIds, int $start, int $limit, string $filter = '', int $uid = 0): array {
+		$forumIds = array_values(array_filter(array_map('intval', $forumIds)));
+		if (!$forumIds) {
+			return ['ids' => [], 'total' => 0];
+		}
+		$joins = '';
+		$where = ' WHERE t.approved = 1 AND t.forum_id IN (' . implode(',', $forumIds) . ')';
+		if ($filter === 'digest') {
+			$where .= ' AND t.topic_digest = 1';
+		} elseif ($filter === 'unread') {
+			if ($uid < 1) {
+				return ['ids' => [], 'total' => 0];
+			}
+			$unread = icms_getModuleHandler('readmark', IMFORUM_DIRNAME)->getUnreadSql($uid);
+			$joins = $unread['joins'];
+			$where .= $unread['where'];
+		}
+
+		$total = 0;
+		$result = $this->db->queryF("SELECT COUNT(*) FROM {$this->table} t$joins$where");
+		if ($result && ($row = $this->db->fetchRow($result))) {
+			$total = (int) $row[0];
+		}
+
+		$ids = [];
+		$result = $this->db->queryF("SELECT t.topic_id FROM {$this->table} t$joins$where ORDER BY t.topic_last_post_id DESC LIMIT " . max(0, $start) . ', ' . max(1, $limit));
+		while ($result && ($row = $this->db->fetchRow($result))) {
+			$ids[] = (int) $row[0];
+		}
+		return ['ids' => $ids, 'total' => $total];
+	}
+
+	/**
+	 * The topics with the most replies among those that saw a new post since a moment
+	 *
+	 * @param list<int> $forumIds the forums the reader may open
+	 * @return list<int> topic ids, busiest first
+	 */
+	public function findHot(array $forumIds, int $since, int $limit): array {
+		$forumIds = array_values(array_filter(array_map('intval', $forumIds)));
+		if (!$forumIds) {
+			return [];
+		}
+		$posts = $this->db->prefix(IMFORUM_DIRNAME . '_post');
+		$ids = [];
+		$result = $this->db->queryF(
+			"SELECT t.topic_id FROM {$this->table} t JOIN $posts p ON p.post_id = t.topic_last_post_id"
+			. ' WHERE t.approved = 1 AND t.topic_replies > 0 AND t.forum_id IN (' . implode(',', $forumIds) . ') AND p.post_time >= ' . max(0, $since)
+			. ' ORDER BY t.topic_replies DESC, t.topic_last_post_id DESC LIMIT ' . max(1, $limit)
+		);
+		while ($result && ($row = $this->db->fetchRow($result))) {
+			$ids[] = (int) $row[0];
+		}
+		return $ids;
+	}
+
+	/**
+	 * Count a view
+	 */
+	public function incrementViews(int $topicId): bool {
+		return (bool) $this->db->queryF("UPDATE {$this->table} SET topic_views = topic_views + 1 WHERE topic_id = $topicId");
+	}
+
 	protected function beforeInsert(mod_imforum_Topic $topic): bool {
 		if ((int) $topic->getVar('topic_time', 'e') === 0) {
 			$topic->setVar('topic_time', time());

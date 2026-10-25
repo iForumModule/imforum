@@ -71,6 +71,31 @@ abstract class IntegrationTestCase extends TestCase
 		]);
 	}
 
+	/**
+	 * Give groups permissions on a forum, as the admin form does
+	 *
+	 * @param list<string> $permissions gperm names, such as forum_access
+	 * @param list<int> $groups
+	 */
+	protected static function grant(int $forumId, array $permissions, array $groups): void
+	{
+		$handler = new \icms_ipf_permission_Handler(self::handler('forum'));
+		foreach ($permissions as $permission) {
+			self::assertTrue($handler->saveItem_Permissions($groups, $forumId, $permission));
+		}
+	}
+
+	/**
+	 * Let groups see a category, as the admin form does
+	 *
+	 * @param list<int> $groups
+	 */
+	protected static function grantCategory(int $catId, array $groups): void
+	{
+		$handler = new \icms_ipf_permission_Handler(self::handler('category'));
+		self::assertTrue($handler->saveItem_Permissions($groups, $catId, 'category_access'));
+	}
+
 	protected static function reload(string $item, int $id): icms_ipf_Object
 	{
 		$object = self::handler($item)->get($id);

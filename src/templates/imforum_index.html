@@ -1,4 +1,61 @@
 <div class="imforum">
+	<{include file="db:imforum_breadcrumb.html"}>
 	<h1><{$smarty.const._MD_IMFORUM_TITLE}></h1>
-	<p><{$smarty.const._MD_IMFORUM_UNDER_CONSTRUCTION}></p>
+
+	<p class="imforum-tools">
+		<a href="<{$imforum_viewall_url}>"><{$smarty.const._MD_IMFORUM_VIEWALL_LATEST}></a>
+		<{if $imforum_is_member}> &middot; <a href="<{$imforum_unread_url}>"><{$smarty.const._MD_IMFORUM_VIEWALL_UNREAD}></a><{/if}>
+		&middot; <a href="<{$smarty.const.IMFORUM_URL}>archive.php"><{$smarty.const._MD_IMFORUM_ARCHIVE}></a>
+		&middot; <a href="<{$smarty.const.IMFORUM_URL}>rss.php"><{$smarty.const._MD_IMFORUM_RSS}></a>
+	</p>
+
+	<{if $imforum_categories}>
+		<{foreach from=$imforum_categories item=category}>
+		<table class="outer imforum-category">
+			<thead>
+				<tr>
+					<th class="head" colspan="4">
+						<{$category.title}>
+						<{if $category.description}><div class="imforum-meta"><{$category.description}></div><{/if}>
+					</th>
+				</tr>
+				<tr>
+					<td class="even"><{$smarty.const._MD_IMFORUM_FORUM}></td>
+					<td class="even imforum-num"><{$smarty.const._MD_IMFORUM_TOPICS}></td>
+					<td class="even imforum-num"><{$smarty.const._MD_IMFORUM_POSTS}></td>
+					<td class="even"><{$smarty.const._MD_IMFORUM_LAST_POST}></td>
+				</tr>
+			</thead>
+			<tbody>
+			<{foreach from=$category.forums item=forum}>
+				<tr class="<{cycle values="odd,even"}>">
+					<td>
+						<a href="<{$forum.url}>"><strong><{$forum.name}></strong></a>
+						<{if $forum.unread}><span class="imforum-badge imforum-new"><{$forum.unread}> <{$smarty.const._MD_IMFORUM_UNREAD}></span><{/if}>
+						<{if $forum.description}><div class="imforum-meta"><{$forum.description}></div><{/if}>
+						<{if $forum.subforums}>
+							<div class="imforum-meta"><{$smarty.const._MD_IMFORUM_SUBFORUMS}>:
+								<{foreach from=$forum.subforums item=sub name=subs}><a href="<{$sub.url}>"><{$sub.name}></a><{if $sub.unread}> (<{$sub.unread}>)<{/if}><{if !$smarty.foreach.subs.last}>, <{/if}><{/foreach}>
+							</div>
+						<{/if}>
+					</td>
+					<td class="imforum-num"><{$forum.topics}></td>
+					<td class="imforum-num"><{$forum.posts}></td>
+					<td class="imforum-last">
+						<{if $forum.last}>
+							<a href="<{$forum.last.url}>"><{$forum.last.subject}></a>
+							<div class="imforum-meta"><{$smarty.const._MD_IMFORUM_BY}> <{$forum.last.poster}>, <{$forum.last.time}></div>
+						<{/if}>
+					</td>
+				</tr>
+			<{/foreach}>
+			</tbody>
+		</table>
+		<{/foreach}>
+		<p class="imforum-meta"><{$imforum_totals.topics}> <{$smarty.const._MD_IMFORUM_TOPICS}>, <{$imforum_totals.posts}> <{$smarty.const._MD_IMFORUM_POSTS}></p>
+	<{else}>
+		<p><{$smarty.const._MD_IMFORUM_NO_FORUMS}></p>
+	<{/if}>
+
+	<{include file="db:imforum_online.html"}>
 </div>

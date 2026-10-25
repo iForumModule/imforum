@@ -52,6 +52,78 @@ class mod_imforum_Post extends icms_ipf_Object {
 		}
 	}
 
+	/** The text is withheld until the karma service has allowed this reader to see it */
+	private bool $unlocked = false;
+
+	private string $lock = '';
+
+	/**
+	 * Does the author ask for karma or a reply before others can read it?
+	 */
+	public function isProtected(): bool {
+		return (int) $this->getVar('post_karma', 'e') > 0 || (int) $this->getVar('require_reply', 'e') === 1;
+	}
+
+	public function unlock(): void {
+		$this->unlocked = true;
+		$this->lock = '';
+	}
+
+	/**
+	 * Remember why the reader may not see the text, for the notice that replaces it
+	 */
+	public function setLock(string $lock): void {
+		$this->unlocked = false;
+		$this->lock = $lock;
+	}
+
+	/**
+	 * What the templates need
+	 *
+	 * Every text value is ready for output. A protected post carries no text
+	 * until mod_imforum_KarmaService has unlocked it, so a template that
+	 * forgets the check cannot leak the post.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function toArray() {
+		$locked = $this->isProtected() && !$this->unlocked;
+		return [
+			'post_id' => (int) $this->id(),
+			'topic_id' => (int) $this->getVar('topic_id', 'e'),
+			'forum_id' => (int) $this->getVar('forum_id', 'e'),
+			'pid' => (int) $this->getVar('pid', 'e'),
+			'uid' => (int) $this->getVar('uid', 'e'),
+			'poster_name' => $this->getVar('poster_name'),
+			'post_time' => (int) $this->getVar('post_time', 'e'),
+			'subject' => $this->getVar('subject'),
+			'icon' => $this->getVar('icon'),
+			'attachsig' => (int) $this->getVar('attachsig', 'e'),
+			'approved' => (int) $this->getVar('approved', 'e'),
+			'locked' => $locked,
+			'lock' => $locked ? $this->lock : '',
+			'text' => $locked ? '' : $this->getFormattedText(),
+			'edits' => $this->getEditHistory(),
+		];
+	}
+
+	/**
+	 * The text as shown: HTML through the purifier, otherwise the text filter with the post's own switches
+	 */
+	private function getFormattedText(): string {
+		$text = (string) $this->getVar('post_text', 'n');
+		if ((int) $this->getVar('dohtml', 'e') === 1) {
+			return (string) icms_core_DataFilter::checkVar($text, 'html', 'output');
+		}
+		return (string) icms_core_DataFilter::filterTextareaDisplay(
+			$text,
+			(int) $this->getVar('dosmiley', 'e'),
+			(int) $this->getVar('doxcode', 'e'),
+			(int) $this->getVar('doimage', 'e'),
+			(int) $this->getVar('dobr', 'e')
+		);
+	}
+
 	/**
 	 * Earlier edits, oldest first
 	 *

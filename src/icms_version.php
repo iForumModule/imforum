@@ -56,7 +56,8 @@ $modversion = [
 	'adminmenu' => 'admin/menu.php',
 
 	'hasMain' => 1,
-	'hasSearch' => 0,
+	'hasSearch' => 1,
+	'search' => ['file' => 'include/search.inc.php', 'func' => 'imforum_search'],
 	'hasComments' => 0,
 	'hasNotification' => 0,
 
@@ -64,10 +65,96 @@ $modversion = [
 		['file' => 'imforum_index.html', 'description' => 'Forum index'],
 		['file' => 'imforum_admin_index.html', 'description' => 'Administration index'],
 		['file' => 'imforum_admin.html', 'description' => 'Administration page'],
+		['file' => 'imforum_forum.html', 'description' => 'Forum with its topics'],
+		['file' => 'imforum_topic.html', 'description' => 'Topic with its posts'],
+		['file' => 'imforum_viewall.html', 'description' => 'Topics of all forums'],
+		['file' => 'imforum_archive.html', 'description' => 'Archived topics'],
+		['file' => 'imforum_breadcrumb.html', 'description' => 'Path above a page'],
+		['file' => 'imforum_topiclist.html', 'description' => 'List of topics'],
+		['file' => 'imforum_online.html', 'description' => 'Who is online'],
 	],
 
-	'blocks' => [],
-	// No 'config' key until the module has preferences: icms_module_Object sets
-	// hasconfig for any array, even an empty one, and the admin menu then
-	// shows a Preferences link that ends on the system preferences.
+	'blocks' => [
+		[
+			'file' => 'imforum_blocks.php',
+			'name' => _MI_IMFORUM_BLOCK_RECENT,
+			'description' => _MI_IMFORUM_BLOCK_RECENT_DSC,
+			'show_func' => 'imforum_block_recent',
+			'edit_func' => 'imforum_block_edit_recent',
+			'options' => '10',
+			'template' => 'imforum_block_topics.html',
+		],
+		[
+			'file' => 'imforum_blocks.php',
+			'name' => _MI_IMFORUM_BLOCK_HOT,
+			'description' => _MI_IMFORUM_BLOCK_HOT_DSC,
+			'show_func' => 'imforum_block_hot',
+			'edit_func' => 'imforum_block_edit_hot',
+			'options' => '10|30',
+			'template' => 'imforum_block_topics.html',
+		],
+		[
+			'file' => 'imforum_blocks.php',
+			'name' => _MI_IMFORUM_BLOCK_TOPPOSTERS,
+			'description' => _MI_IMFORUM_BLOCK_TOPPOSTERS_DSC,
+			'show_func' => 'imforum_block_topposters',
+			'edit_func' => 'imforum_block_edit_recent',
+			'options' => '10',
+			'template' => 'imforum_block_topposters.html',
+		],
+	],
+
+	// Preferences. The first one creates the config array, which is what turns
+	// on the Preferences link of the module: do not declare an empty 'config'.
+	'config' => [
+		[
+			'name' => 'topics_per_page',
+			'title' => '_MI_IMFORUM_CFG_TOPICS_PER_PAGE',
+			'description' => '_MI_IMFORUM_CFG_TOPICS_PER_PAGE_DSC',
+			'formtype' => 'textbox',
+			'valuetype' => 'int',
+			'default' => 20,
+		],
+		[
+			'name' => 'posts_per_page',
+			'title' => '_MI_IMFORUM_CFG_POSTS_PER_PAGE',
+			'description' => '_MI_IMFORUM_CFG_POSTS_PER_PAGE_DSC',
+			'formtype' => 'textbox',
+			'valuetype' => 'int',
+			'default' => 10,
+		],
+		[
+			'name' => 'default_view',
+			'title' => '_MI_IMFORUM_CFG_DEFAULT_VIEW',
+			'description' => '_MI_IMFORUM_CFG_DEFAULT_VIEW_DSC',
+			'formtype' => 'select',
+			'valuetype' => 'text',
+			'default' => 'flat',
+			'options' => ['_MI_IMFORUM_VIEW_FLAT' => 'flat', '_MI_IMFORUM_VIEW_TREE' => 'tree'],
+		],
+		[
+			'name' => 'show_online',
+			'title' => '_MI_IMFORUM_CFG_SHOW_ONLINE',
+			'description' => '_MI_IMFORUM_CFG_SHOW_ONLINE_DSC',
+			'formtype' => 'yesno',
+			'valuetype' => 'int',
+			'default' => 1,
+		],
+		[
+			'name' => 'online_minutes',
+			'title' => '_MI_IMFORUM_CFG_ONLINE_MINUTES',
+			'description' => '_MI_IMFORUM_CFG_ONLINE_MINUTES_DSC',
+			'formtype' => 'textbox',
+			'valuetype' => 'int',
+			'default' => 15,
+		],
+		[
+			'name' => 'rss_items',
+			'title' => '_MI_IMFORUM_CFG_RSS_ITEMS',
+			'description' => '_MI_IMFORUM_CFG_RSS_ITEMS_DSC',
+			'formtype' => 'textbox',
+			'valuetype' => 'int',
+			'default' => 20,
+		],
+	],
 ];

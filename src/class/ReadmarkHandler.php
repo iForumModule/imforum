@@ -77,6 +77,57 @@ class mod_imforum_ReadmarkHandler extends icms_ipf_Handler {
 		return (bool) $this->db->queryF(sprintf('DELETE FROM %s WHERE read_time < %d', $this->table, $time));
 	}
 
+	/**
+	 * Drop a member's marks on the topics of a forum, once the forum itself is marked
+	 */
+	public function deleteTopicMarksInForum(int $uid, int $forumId): bool {
+		$topics = $this->db->prefix(IMFORUM_DIRNAME . '_topic');
+		return (bool) $this->db->queryF(sprintf(
+			'DELETE FROM %s WHERE read_type = %d AND uid = %d AND item_id IN (SELECT topic_id FROM %s WHERE forum_id = %d)',
+			$this->table, self::TYPE_TOPIC, $uid, $topics, $forumId
+		));
+	}
+
+	/**
+	 * SQL pieces that select the topics a member has not read to the end
+	 *
+	 * A topic is unread when its last post is newer than both the member's
+	 * mark on the topic and the mark on its forum ("mark all as read"). The
+	 * topic table must be aliased t.
+	 *
+	 * @return array{joins: string, where: string}
+	 */
+	public function getUnreadSql(int $uid): array {
+		$read = $this->table;
+		return [
+			'joins' => " LEFT JOIN $read rt ON rt.read_type = " . self::TYPE_TOPIC . " AND rt.uid = $uid AND rt.item_id = t.topic_id"
+				. " LEFT JOIN $read rf ON rf.read_type = " . self::TYPE_FORUM . " AND rf.uid = $uid AND rf.item_id = t.forum_id",
+			'where' => ' AND t.topic_last_post_id > GREATEST(COALESCE(rt.post_id, 0), COALESCE(rf.post_id, 0))',
+		];
+	}
+
+	/**
+	 * Unread topics per forum
+	 *
+	 * @param list<int> $forumIds
+	 * @return array<int, int> forum id => unread topics; forums without any are left out
+	 */
+	public function countUnreadByForum(int $uid, array $forumIds): array {
+		$forumIds = array_values(array_filter(array_map('intval', $forumIds)));
+		if ($uid < 1 || !$forumIds) {
+			return [];
+		}
+		$unread = $this->getUnreadSql($uid);
+		$sql = 'SELECT t.forum_id, COUNT(*) FROM ' . $this->db->prefix(IMFORUM_DIRNAME . '_topic') . ' t' . $unread['joins']
+			. ' WHERE t.approved = 1 AND t.forum_id IN (' . implode(',', $forumIds) . ')' . $unread['where'] . ' GROUP BY t.forum_id';
+		$counts = [];
+		$result = $this->db->queryF($sql);
+		while ($result && ($row = $this->db->fetchRow($result))) {
+			$counts[(int) $row[0]] = (int) $row[1];
+		}
+		return $counts;
+	}
+
 	private function criteriaFor(int $type, int $uid, int $itemId): icms_db_criteria_Compo {
 		$criteria = new icms_db_criteria_Compo(new icms_db_criteria_Item('read_type', $type));
 		$criteria->add(new icms_db_criteria_Item('uid', $uid));
