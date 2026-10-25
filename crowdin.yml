@@ -1,0 +1,15 @@
+files:
+  - source: /src/language/english/*.php
+    translation: /src/language/%two_letters_code%/%original_file_name%
+    languages_mapping:
+      two_letters_code:
+        nl: nederlands
+        fr: francais
+        it: italiano
+        de: german
+        es: spanish
+        pt-BR: portuguesebr
+        ru: russian
+        fa: persian
+        ja: ja_utf8
+        zh-CN: schinese
