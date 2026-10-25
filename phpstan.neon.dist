@@ -1,0 +1,16 @@
+parameters:
+    level: 6
+    paths:
+        - src
+    excludePaths:
+        - src/language/*
+    bootstrapFiles:
+        - tests/phpstan-bootstrap.php
+    # The ImpressCMS core is checked out next to the module in CI (see .github/workflows/ci.yml)
+    # and only scanned for class and function signatures, never analysed.
+    scanDirectories:
+        - %env.ICMS_CORE_PATH%/libraries/icms
+    scanFiles:
+        - %env.ICMS_CORE_PATH%/include/functions.php
+        - %env.ICMS_CORE_PATH%/include/cp_functions.php
+        - %env.ICMS_CORE_PATH%/libraries/icms.php
