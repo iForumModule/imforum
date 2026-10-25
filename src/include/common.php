@@ -24,3 +24,9 @@ if (!defined('IMFORUM_DIRNAME')) {
 	/** Raise by one for every release that needs an imforum_db_upgrade_<n>() step */
 	define('IMFORUM_DB_VERSION', 1);
 }
+
+// Form labels and permission captions. The core does not load a module's
+// common.php by itself, and the handlers need it as soon as they are built.
+if (function_exists('icms_loadLanguageFile')) {
+	icms_loadLanguageFile(IMFORUM_DIRNAME, 'common');
+}

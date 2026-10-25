@@ -18,7 +18,8 @@
     "scripts": {
         "lint": "find src tests -name '*.php' -print0 | xargs -0 -n1 php -l",
         "analyse": "phpstan analyse",
-        "test": "phpunit"
+        "test": "phpunit",
+        "test:integration": "phpunit -c phpunit.integration.xml.dist"
     },
     "config": {
         "sort-packages": true

@@ -47,3 +47,68 @@ jobs:
 
       - name: Unit tests
         run: composer test
+
+  integration:
+    name: Integration, PHP ${{ matrix.php }}, ${{ matrix.db }} ${{ matrix.engine || 'default engine' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # oldest supported server; InnoDB there has no FULLTEXT
+          - php: '8.2'
+            db: 'mysql:5.5'
+            engine: ''
+          # servers without InnoDB
+          - php: '8.4'
+            db: 'mysql:5.7'
+            engine: 'MyISAM'
+          - php: '8.5'
+            db: 'mariadb:10.11'
+            engine: ''
+    services:
+      db:
+        image: ${{ matrix.db }}
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: icms_test
+          MYSQL_USER: icms
+          MYSQL_PASSWORD: icms
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    env:
+      ICMS_CORE_PATH: ${{ github.workspace }}/core/htdocs
+      IMFORUM_TEST_DB_HOST: 127.0.0.1
+      IMFORUM_TEST_DB_NAME: icms_test
+      IMFORUM_TEST_DB_USER: icms
+      IMFORUM_TEST_DB_PASS: icms
+      IMFORUM_TEST_DB_ENGINE: ${{ matrix.engine }}
+    steps:
+      - name: Checkout module
+        uses: actions/checkout@v4
+
+      - name: Checkout ImpressCMS core
+        uses: actions/checkout@v4
+        with:
+          repository: fiammybe/impresscms
+          ref: main
+          path: core
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: pdo_mysql
+          coverage: none
+          tools: composer:v2
+
+      - name: Install dev dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Integration tests
+        run: composer test:integration
