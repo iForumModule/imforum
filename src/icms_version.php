@@ -40,10 +40,13 @@ $modversion = [
 	'submit_bug' => 'https://github.com/iForumModule/imforum/issues',
 	'submit_feature' => 'https://github.com/iForumModule/imforum/issues',
 
-	// IPF objects, filled in phase 1. An empty array already enables IPF mode
-	// (autoloading), but the core only runs the table sync and the
-	// imforum_db_upgrade_<n>() steps once the array is not empty.
-	'object_items' => [],
+	// IPF objects: one table <prefix>_imforum_<item> each, classes in class/.
+	// Never remove or rename an item without a migration; the core would leave
+	// the old table behind and create an empty new one.
+	'object_items' => [
+		'category', 'forum', 'moderator', 'topic', 'post', 'attachment', 'report',
+		'suspension', 'readmark', 'online', 'digest', 'archive', 'permtemplate',
+	],
 
 	'onInstall' => 'include/onupdate.php',
 	'onUpdate' => 'include/onupdate.php',

@@ -14,3 +14,23 @@ parameters:
         - %env.ICMS_CORE_PATH%/include/functions.php
         - %env.ICMS_CORE_PATH%/include/cp_functions.php
         - %env.ICMS_CORE_PATH%/libraries/icms.php
+    # Core docblocks that are narrower than the code they describe. The core
+    # itself passes these types everywhere; casting in the module would only
+    # hide that.
+    ignoreErrors:
+        -
+            # icms_db_criteria_Item::__construct() documents string, renders any scalar
+            message: '#^Parameter \#2 \$value of class icms_db_criteria_Item constructor expects string, int#'
+            identifier: argument.type
+        -
+            # icms_ipf_Object::initCommonVar() documents its parameters as "str"
+            message: '#^Parameter \#\d \$\w+ of method icms_ipf_Object::initCommonVar\(\) expects str, #'
+            identifier: argument.type
+        -
+            # icms_ipf_Tree::getFirstChild() documents string; the tree is keyed by integer ids
+            message: '#^Parameter \#1 \$key of method icms_ipf_Tree::getFirstChild\(\) expects string, int given\.$#'
+            identifier: argument.type
+        -
+            # icms_db_legacy_IDatabase::queryF() documents a resource, but returns false when the query fails
+            identifier: ternary.alwaysTrue
+            path: src/include/onupdate.php
