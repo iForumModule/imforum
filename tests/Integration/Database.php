@@ -20,6 +20,11 @@ final class Database
 	{
 		$db = icms::$xoopsDB;
 
+		// The core creates tables with the default character set of the database, which is
+		// latin1 on a stock MySQL 5.5. A site with international text needs utf8mb4, and the
+		// importer insists on it.
+		self::exec('ALTER DATABASE `' . XOOPS_DB_NAME . '` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci');
+
 		$engine = getenv('IMFORUM_TEST_DB_ENGINE');
 		if ($engine) {
 			self::exec('SET SESSION default_storage_engine = ' . $db->quoteString($engine));

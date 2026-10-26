@@ -140,7 +140,7 @@ define('_AM_IMFORUM_IMPORT_ERR_NO_SOURCE', 'The module "%s" is not installed. Th
 define('_AM_IMFORUM_IMPORT_ERR_NO_TARGET', 'imforum is not installed.');
 define('_AM_IMFORUM_IMPORT_ERR_NO_TABLE', 'The table %s is missing.');
 define('_AM_IMFORUM_IMPORT_ERR_COLUMNS', 'The table %s lacks the columns: %s.');
-define('_AM_IMFORUM_IMPORT_ERR_CHARSET', 'The table %s is %s, not utf8mb4. Update imforum, then try again.');
+define('_AM_IMFORUM_IMPORT_ERR_CHARSET', 'The table %s is %s, not utf8mb4. Convert it with ALTER TABLE ... CONVERT TO CHARACTER SET utf8mb4 (or make utf8mb4 the default of the database and reinstall imforum), then try again.');
 define('_AM_IMFORUM_IMPORT_ERR_LONG', '%d posts are longer than 65,535 bytes once converted.');
 define('_AM_IMFORUM_IMPORT_ERR_COUNT', '%s: %d in iForum, %d in imforum.');
 define('_AM_IMFORUM_IMPORT_ERR_GROUPS', '%s differ (id: iForum/imforum): %s');
