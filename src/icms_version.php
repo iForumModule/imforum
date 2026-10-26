@@ -19,8 +19,8 @@ include_once __DIR__ . '/include/common.php';
 $modversion = [
 	'name' => _MI_IMFORUM_NAME,
 	'version' => '1.0.0',
-	'status' => 'Alpha 6',
-	'status_version' => '1.0.0 Alpha 6',
+	'status' => 'Alpha 7',
+	'status_version' => '1.0.0 Alpha 7',
 	'date' => '25 October 2026',
 	'description' => _MI_IMFORUM_DESC,
 	'author' => 'fiammybe',

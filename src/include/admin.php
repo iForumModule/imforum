@@ -142,3 +142,45 @@ function imforum_admin_page(int $menuIndex, string $title, string|Closure $conte
 function imforum_form_add(icms_form_Base $form, icms_form_Element $element, bool $required = false): void {
 	$form->addElement($element, $required);
 }
+
+/**
+ * The report of the importer as HTML: errors, warnings, the overview and the log
+ *
+ * @param array{ok: bool, errors: list<string>, warnings: list<string>, rows: list<array{label: string, source: int|string, target: int|string, note: string}>, log: list<string>} $report
+ */
+function imforum_import_report_html(array $report): string {
+	$e = static fn (mixed $text): string => htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8');
+	$html = '';
+	if ($report['errors']) {
+		$html .= '<div class="errorMsg"><strong>' . $e(_AM_IMFORUM_IMPORT_RESULT_ERRORS) . '</strong><ul>';
+		foreach ($report['errors'] as $message) {
+			$html .= '<li>' . $e($message) . '</li>';
+		}
+		$html .= '</ul></div>';
+	} else {
+		$html .= '<div class="resultMsg">' . $e(_AM_IMFORUM_IMPORT_RESULT_OK) . '</div>';
+	}
+	if ($report['warnings']) {
+		$html .= '<div class="confirmMsg"><strong>' . $e(_AM_IMFORUM_IMPORT_RESULT_WARNINGS) . '</strong><ul>';
+		foreach ($report['warnings'] as $message) {
+			$html .= '<li>' . $e($message) . '</li>';
+		}
+		$html .= '</ul></div>';
+	}
+	if ($report['rows']) {
+		$html .= '<h3>' . $e(_AM_IMFORUM_IMPORT_RESULT_ROWS) . '</h3><table class="outer" cellspacing="1"><tr>'
+			. '<th>' . $e(_AM_IMFORUM_IMPORT_COL_ITEM) . '</th><th>' . $e(_AM_IMFORUM_IMPORT_COL_SOURCE) . '</th><th>' . $e(_AM_IMFORUM_IMPORT_COL_TARGET) . '</th><th>' . $e(_AM_IMFORUM_IMPORT_COL_NOTE) . '</th></tr>';
+		foreach ($report['rows'] as $i => $row) {
+			$html .= '<tr class="' . ($i % 2 ? 'odd' : 'even') . '"><td>' . $e($row['label']) . '</td><td>' . $e($row['source']) . '</td><td>' . $e($row['target']) . '</td><td>' . $e($row['note']) . '</td></tr>';
+		}
+		$html .= '</table>';
+	}
+	if ($report['log']) {
+		$html .= '<h3>' . $e(_AM_IMFORUM_IMPORT_RESULT_LOG) . '</h3><ul>';
+		foreach ($report['log'] as $line) {
+			$html .= '<li>' . $e($line) . '</li>';
+		}
+		$html .= '</ul>';
+	}
+	return $html;
+}

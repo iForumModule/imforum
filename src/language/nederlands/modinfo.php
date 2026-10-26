@@ -14,6 +14,7 @@ define('_MI_IMFORUM_MENU_SUSPENSIONS', 'Schorsingen');
 define('_MI_IMFORUM_MENU_DIGESTS', 'Digests');
 define('_MI_IMFORUM_MENU_ARCHIVE', 'Archief');
 define('_MI_IMFORUM_MENU_PRUNE', 'Opruimen en hertellen');
+define('_MI_IMFORUM_MENU_IMPORT', 'Importeren uit iForum');
 define('_MI_IMFORUM_BLOCK_RECENT', 'Laatste onderwerpen');
 define('_MI_IMFORUM_BLOCK_RECENT_DSC', 'De onderwerpen met de nieuwste berichten');
 define('_MI_IMFORUM_BLOCK_HOT', 'Drukste onderwerpen');

@@ -13,12 +13,17 @@ use RuntimeException;
  */
 final class Database
 {
-	/** Core tables the IPF handlers touch: the module row and group permissions */
-	private const CORE_TABLES = ['modules', 'group_permission'];
+	/** Core tables the IPF handlers touch: the module row and group permissions; the importer reads the preferences and subscriptions too */
+	private const CORE_TABLES = ['modules', 'group_permission', 'config', 'xoopsnotifications'];
 
 	public static function install(): void
 	{
 		$db = icms::$xoopsDB;
+
+		// The core creates tables with the default character set of the database, which is
+		// latin1 on a stock MySQL 5.5. A site with international text needs utf8mb4, and the
+		// importer insists on it.
+		self::exec('ALTER DATABASE `' . XOOPS_DB_NAME . '` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci');
 
 		$engine = getenv('IMFORUM_TEST_DB_ENGINE');
 		if ($engine) {
@@ -58,7 +63,14 @@ final class Database
 		foreach (self::tables('imforum_') as $table) {
 			self::exec("TRUNCATE TABLE `$table`");
 		}
-		self::exec('TRUNCATE TABLE `' . icms::$xoopsDB->prefix('group_permission') . '`');
+		foreach (['group_permission', 'config', 'xoopsnotifications'] as $table) {
+			self::exec('TRUNCATE TABLE `' . icms::$xoopsDB->prefix($table) . '`');
+		}
+		// the importer tests leave tables of an old iForum behind
+		foreach (self::tables('bb_') as $table) {
+			self::exec("DROP TABLE `$table`");
+		}
+		self::exec('DELETE FROM `' . icms::$xoopsDB->prefix('modules') . "` WHERE dirname <> 'imforum'");
 	}
 
 	/**

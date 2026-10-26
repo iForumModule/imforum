@@ -23,6 +23,7 @@ foreach ([
 	'digest' => _MI_IMFORUM_MENU_DIGESTS,
 	'archive' => _MI_IMFORUM_MENU_ARCHIVE,
 	'prune' => _MI_IMFORUM_MENU_PRUNE,
+	'import' => _MI_IMFORUM_MENU_IMPORT,
 ] as $script => $title) {
 	$adminmenu[] = [
 		'title' => $title,
