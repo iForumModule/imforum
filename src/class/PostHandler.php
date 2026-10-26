@@ -213,6 +213,27 @@ class mod_imforum_PostHandler extends icms_ipf_Handler {
 		return (int) $this->getCount($criteria);
 	}
 
+	/**
+	 * When the member or the address posted last, for the flood check; 0 when never
+	 */
+	public function getLastPostTime(int $uid, string $ip): int {
+		$who = new icms_db_criteria_Compo();
+		if ($uid > 0) {
+			$who->add(new icms_db_criteria_Item('uid', $uid));
+		} elseif (filter_var($ip, FILTER_VALIDATE_IP) !== false) {
+			// criteria values are not escaped by the core, so only a valid address goes in
+			$who->add(new icms_db_criteria_Item('poster_ip', $ip));
+			$who->add(new icms_db_criteria_Item('uid', 0));
+		} else {
+			return 0;
+		}
+		$who->setSort('post_time');
+		$who->setOrder('DESC');
+		$who->setLimit(1);
+		$posts = $this->getObjects($who);
+		return $posts ? (int) reset($posts)->getVar('post_time', 'e') : 0;
+	}
+
 	protected function beforeInsert(mod_imforum_Post $post): bool {
 		if ((int) $post->getVar('post_time', 'e') === 0) {
 			$post->setVar('post_time', time());

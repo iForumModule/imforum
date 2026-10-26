@@ -65,6 +65,22 @@ class mod_imforum_View {
 		return ['members' => $members, 'member_count' => count($members), 'guests' => $snapshot['guests']];
 	}
 
+	/**
+	 * The address of the visitor, or an empty string when the server does not give a valid one
+	 */
+	public static function clientIp(): string {
+		$ip = $_SERVER['REMOTE_ADDR'] ?? '';
+		return is_string($ip) && filter_var($ip, FILTER_VALIDATE_IP) !== false ? $ip : '';
+	}
+
+	/**
+	 * The prefix of a topic ("Question") ready to print, or an empty string
+	 */
+	public static function prefix(int $index): string {
+		$prefixes = mod_imforum_PostService::getPrefixes();
+		return isset($prefixes[$index]) ? self::escape($prefixes[$index]) : '';
+	}
+
 	public static function escape(string $text): string {
 		return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
 	}

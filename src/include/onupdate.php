@@ -132,13 +132,3 @@ function icms_module_install_imforum(icms_module_Object $module): bool {
 function icms_module_update_imforum(icms_module_Object $module, ?string $oldversion = null, ?int $olddbversion = null): bool {
 	return imforum_create_upload_folder();
 }
-
-/**
- * Make sure uploads/imforum exists, without granting world-write access
- */
-function imforum_create_upload_folder(): bool {
-	if (is_dir(IMFORUM_UPLOAD_PATH)) {
-		return true;
-	}
-	return mkdir(IMFORUM_UPLOAD_PATH, 0755, true);
-}

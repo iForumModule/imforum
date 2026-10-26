@@ -27,6 +27,10 @@ parameters:
             message: '#^Parameter \#\d \$\w+ of (method|class) icms_\w+(::\w+\(\)| constructor) expects (str|unknown_type), #'
             identifier: argument.type
         -
+            # icms_ipf_form_Secure::__construct() documents the IPF object as a string
+            message: '#^Parameter \#1 \$target of class icms_ipf_form_Secure constructor expects string, mod_imforum_\w+ given\.$#'
+            identifier: argument.type
+        -
             # icms_ipf_Tree::getFirstChild() documents string; the tree is keyed by integer ids
             message: '#^Parameter \#1 \$key of method icms_ipf_Tree::getFirstChild\(\) expects string, int given\.$#'
             identifier: argument.type

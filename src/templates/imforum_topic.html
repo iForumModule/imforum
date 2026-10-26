@@ -1,6 +1,6 @@
 <div class="imforum">
 	<{include file="db:imforum_breadcrumb.html"}>
-	<h1><{$imforum_topic.title}><{if $imforum_topic.locked}> <span class="imforum-badge"><{$smarty.const._MD_IMFORUM_LOCKED}></span><{/if}></h1>
+	<h1><{if $imforum_topic.prefix}>[<{$imforum_topic.prefix}>] <{/if}><{$imforum_topic.title}><{if $imforum_topic.locked}> <span class="imforum-badge"><{$smarty.const._MD_IMFORUM_LOCKED}></span><{/if}></h1>
 	<p class="imforum-tools">
 		<{$imforum_topic.replies}> <{$smarty.const._MD_IMFORUM_REPLIES}>, <{$imforum_topic.views}> <{$smarty.const._MD_IMFORUM_VIEWS}>
 		&middot;
@@ -8,6 +8,7 @@
 		<{else}><strong><{$smarty.const._MD_IMFORUM_VIEW_FLAT}></strong> | <a href="<{$imforum_tree_url}>"><{$smarty.const._MD_IMFORUM_VIEW_TREE}></a><{/if}>
 	</p>
 
+	<{if $imforum_reply_url}><p class="imforum-actions"><a class="imforum-button" href="<{$imforum_reply_url}>"><{$smarty.const._MD_IMFORUM_REPLY}></a></p><{/if}>
 	<{$imforum_pager}>
 	<{foreach from=$imforum_posts item=post}>
 	<article class="imforum-post imforum-depth-<{$post.depth}>" id="post-<{$post.post_id}>">
@@ -37,10 +38,27 @@
 					<{$post.text}>
 				<{/if}>
 			</div>
+			<{if $post.attachments}>
+				<div class="imforum-attachments"><strong><{$smarty.const._MD_IMFORUM_ATTACHMENTS}>:</strong>
+					<ul>
+					<{foreach from=$post.attachments item=attachment}>
+						<li><a href="<{$attachment.url}>"><{$attachment.name}></a> <span class="imforum-meta">(<{$attachment.size}>, <{$attachment.downloads}> <{$smarty.const._MD_IMFORUM_DOWNLOADS}>)</span></li>
+					<{/foreach}>
+					</ul>
+				</div>
+			<{/if}>
 			<{if $post.signature}><div class="imforum-signature"><{$post.signature}></div><{/if}>
 			<{if $post.edits}>
 				<div class="imforum-meta"><{$smarty.const._MD_IMFORUM_EDITED_BY}>
 					<{foreach from=$post.edits item=edit name=edits}><{$edit.name}> (<{$edit.time}>)<{if !$smarty.foreach.edits.last}>, <{/if}><{/foreach}>
+				</div>
+			<{/if}>
+			<{if $post.reply_url || $post.edit_url || $post.delete_url}>
+				<div class="imforum-post-actions">
+					<{if $post.reply_url}><a href="<{$post.reply_url}>"><{$smarty.const._MD_IMFORUM_REPLY}></a><{/if}>
+					<{if $post.quote_url}><a href="<{$post.quote_url}>"><{$smarty.const._MD_IMFORUM_QUOTE}></a><{/if}>
+					<{if $post.edit_url}><a href="<{$post.edit_url}>"><{$smarty.const._MD_IMFORUM_EDIT}></a><{/if}>
+					<{if $post.delete_url}><a href="<{$post.delete_url}>"><{$smarty.const._MD_IMFORUM_DELETE}></a><{/if}>
 				</div>
 			<{/if}>
 		</div>
@@ -48,6 +66,23 @@
 	<{/foreach}>
 	<{$imforum_pager}>
 
+	<{if $imforum_quickreply}>
+	<form method="post" action="<{$imforum_quickreply.action}>" class="imforum-quickreply">
+		<h2><{$smarty.const._MD_IMFORUM_QUICKREPLY}></h2>
+		<{$imforum_quickreply.token}>
+		<input type="hidden" name="do" value="reply" />
+		<input type="hidden" name="forum" value="<{$imforum_quickreply.forum}>" />
+		<input type="hidden" name="topic" value="<{$imforum_quickreply.topic}>" />
+		<input type="hidden" name="subject" value="<{$imforum_quickreply.subject}>" />
+		<input type="hidden" name="dosmiley" value="1" /><input type="hidden" name="doxcode" value="1" /><input type="hidden" name="doimage" value="1" /><input type="hidden" name="dobr" value="1" />
+		<{if $imforum_quickreply.signature}><input type="hidden" name="attachsig" value="1" /><{/if}>
+		<{if $imforum_quickreply.guest}><p><label><{$smarty.const._MD_IMFORUM_YOUR_NAME}> <input type="text" name="poster_name" maxlength="25" /></label></p><{/if}>
+		<p><textarea name="post_text" rows="6" cols="60" required="required"></textarea></p>
+		<p><button type="submit"><{$smarty.const._MD_IMFORUM_POST}></button></p>
+	</form>
+	<{/if}>
+
 	<p><a href="<{$imforum_topic.forum_url}>">&laquo; <{$imforum_topic.forum_name}></a></p>
+	<{include file="db:system_notification_select.html"}>
 	<{include file="db:imforum_online.html"}>
 </div>
