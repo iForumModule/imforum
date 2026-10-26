@@ -24,6 +24,14 @@ class mod_imforum_Settings {
 		'show_online' => 1,
 		'online_minutes' => 15,
 		'rss_items' => 20,
+		'edit_timelimit' => 30,
+		'flood_seconds' => 30,
+		'quickreply_enabled' => 1,
+		'captcha_guests' => 1,
+		'attach_max_files' => 3,
+		'subject_prefix' => '',
+		'disclaimer_show' => 0,
+		'disclaimer' => '',
 	];
 
 	/** @var array<string, mixed>|null */

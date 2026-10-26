@@ -61,6 +61,7 @@ if ($order !== null) {
 }
 
 $karma = new mod_imforum_KarmaService($permissions->getUid());
+$canReply = $permissions->canReply($forum, $topic);
 $minutes = mod_imforum_Settings::getCount('online_minutes');
 $posters = mod_imforum_PosterInfo::load(array_map(static fn (mod_imforum_Post $post): int => (int) $post->getVar('uid', 'e'), $posts), $minutes);
 
@@ -81,8 +82,31 @@ foreach ($posts as $postId => $post) {
 		'name' => mod_imforum_View::poster((int) $edit['uid'], (string) $edit['name']),
 		'time' => mod_imforum_View::time((int) $edit['time']),
 	], $row['edits']);
+	$row['attachments'] = [];
+	$row['can_edit'] = $permissions->canEdit($forum, $topic, $post);
+	$row['can_delete'] = $permissions->canDelete($forum, $topic, $post);
+	$row['reply_url'] = $canReply ? mod_imforum_View::link('post', ['topic' => $topicId, 'post' => $postId]) : '';
+	$row['quote_url'] = ($canReply && !$row['locked']) ? mod_imforum_View::link('post', ['topic' => $topicId, 'post' => $postId, 'quote' => 1]) : '';
+	$row['edit_url'] = $row['can_edit'] ? mod_imforum_View::link('post', ['do' => 'edit', 'post' => $postId]) : '';
+	$row['delete_url'] = $row['can_delete'] ? mod_imforum_View::link('post', ['do' => 'delete', 'post' => $postId]) : '';
 	$rows[] = $row;
 }
+
+// the files of the posts the reader may open
+$attachments = icms_getModuleHandler('attachment', IMFORUM_DIRNAME)->getByPosts(array_keys($posts));
+foreach ($rows as &$row) {
+	if (!$row['locked']) {
+		foreach ($attachments[$row['post_id']] ?? [] as $attachment) {
+			$row['attachments'][] = [
+				'url' => mod_imforum_View::link('attachment', ['id' => (int) $attachment->id()]),
+				'name' => $attachment->getVar('name_display'),
+				'size' => round((int) $attachment->getVar('filesize', 'e') / 1024) . ' KB',
+				'downloads' => (int) $attachment->getVar('downloads', 'e'),
+			];
+		}
+	}
+}
+unset($row);
 
 // reading a page marks the topic as read up to the newest post seen; the last page reads it to the end
 $tracker = new mod_imforum_ReadTracker($permissions->getUid());
@@ -121,6 +145,7 @@ if ($showOnline) {
 $icmsTpl->assign('imforum_breadcrumb', mod_imforum_View::breadcrumb($trail));
 $icmsTpl->assign('imforum_topic', [
 	'id' => $topicId,
+	'prefix' => mod_imforum_View::prefix((int) $topic->getVar('topic_subject', 'e')),
 	'title' => $topic->getVar('topic_title'),
 	'views' => (int) $topic->getVar('topic_views', 'e'),
 	'replies' => (int) $topic->getVar('topic_replies', 'e'),
@@ -129,6 +154,19 @@ $icmsTpl->assign('imforum_topic', [
 	'forum_name' => $forum->getVar('forum_name'),
 ]);
 $icmsTpl->assign('imforum_posts', $rows);
+$icmsTpl->assign('imforum_reply_url', $canReply ? mod_imforum_View::link('post', ['topic' => $topicId]) : '');
+// the quick reply is a short form on the page; with a captcha the full form is needed
+$quick = $canReply && (int) mod_imforum_Settings::get('quickreply_enabled') === 1
+	&& !($permissions->getUid() === 0 && (int) mod_imforum_Settings::get('captcha_guests') === 1);
+$icmsTpl->assign('imforum_quickreply', $quick ? [
+	'action' => mod_imforum_View::link('post'),
+	'token' => icms::$security->getTokenHTML(),
+	'topic' => $topicId,
+	'forum' => $forumId,
+	'subject' => mod_imforum_View::escape('Re: ' . preg_replace('/^(Re:\s*)+/i', '', (string) $topic->getVar('topic_title', 'n'))),
+	'guest' => $permissions->getUid() === 0,
+	'signature' => $permissions->getUid() > 0 && (int) $forum->getVar('allow_sig', 'e') === 1,
+] : null);
 $icmsTpl->assign('imforum_mode', $mode);
 $icmsTpl->assign('imforum_flat_url', mod_imforum_View::link('topic', ['topic' => $topicId, 'mode' => 'flat']));
 $icmsTpl->assign('imforum_tree_url', mod_imforum_View::link('topic', ['topic' => $topicId, 'mode' => 'tree']));

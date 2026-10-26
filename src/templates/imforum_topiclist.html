@@ -19,7 +19,7 @@
 				<{if $topic.sticky}><span class="imforum-badge"><{$smarty.const._MD_IMFORUM_STICKY}></span><{/if}>
 				<{if $topic.digest}><span class="imforum-badge"><{$smarty.const._MD_IMFORUM_FEATURED}></span><{/if}>
 				<{if $topic.hot}><span class="imforum-badge"><{$smarty.const._MD_IMFORUM_HOT}></span><{/if}>
-				<a href="<{$topic.url}>"><{$topic.title}></a>
+				<{if $topic.prefix}><span class="imforum-prefix">[<{$topic.prefix}>]</span> <{/if}><a href="<{$topic.url}>"><{$topic.title}></a>
 				<{if $topic.pages}>
 					<span class="imforum-pages">[<{foreach from=$topic.pages item=page}><a href="<{$page.url}>"><{$page.number}></a> <{/foreach}><{if $topic.more_pages}>&hellip;<{/if}>]</span>
 				<{/if}>

@@ -28,6 +28,8 @@
 	</table>
 	<{/if}>
 
+	<{if $imforum_new_topic_url}><p class="imforum-actions"><a class="imforum-button" href="<{$imforum_new_topic_url}>"><{$smarty.const._MD_IMFORUM_NEW_TOPIC}></a></p><{/if}>
+
 	<{if $imforum_topics}>
 		<{$imforum_pager}>
 		<{include file="db:imforum_topiclist.html"}>
@@ -44,5 +46,6 @@
 	</form>
 	<{/if}>
 
+	<{include file="db:system_notification_select.html"}>
 	<{include file="db:imforum_online.html"}>
 </div>

@@ -85,6 +85,7 @@ foreach (['global', 'core', 'databaseupdater'] as $file) {
 	icms_loadLanguageFile('core', $file);
 }
 icms_loadLanguageFile('system', 'common');
+require_once ICMS_ROOT_PATH . '/modules/imforum/language/english/main.php';
 
 require_once __DIR__ . '/Integration/Database.php';
 \Imforum\Tests\Integration\Database::install();

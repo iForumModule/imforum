@@ -18,6 +18,36 @@ class mod_imforum_AttachmentHandler extends icms_ipf_Handler {
 		parent::__construct($db, 'attachment', 'attach_id', 'name_display', '', IMFORUM_DIRNAME);
 	}
 
+	/**
+	 * The attachments of these posts that are online
+	 *
+	 * @param list<int> $postIds
+	 * @return array<int, list<mod_imforum_Attachment>> post id => attachments, oldest first
+	 */
+	public function getByPosts(array $postIds): array {
+		$postIds = array_values(array_filter(array_map('intval', $postIds)));
+		if (!$postIds) {
+			return [];
+		}
+		$criteria = new icms_db_criteria_Compo(new icms_db_criteria_Item('post_id', '(' . implode(',', $postIds) . ')', 'IN'));
+		$criteria->add(new icms_db_criteria_Item('online', 1));
+		$criteria->setSort('attach_id');
+		$criteria->setOrder('ASC');
+		$byPost = [];
+		foreach ($this->getObjects($criteria) as $attachment) {
+			$byPost[(int) $attachment->getVar('post_id', 'e')][] = $attachment;
+		}
+		return $byPost;
+	}
+
+	public function incrementDownloads(int $attachId): bool {
+		return (bool) $this->db->queryF("UPDATE {$this->table} SET downloads = downloads + 1 WHERE attach_id = $attachId");
+	}
+
+	public function countForPost(int $postId): int {
+		return $this->getCount(new icms_db_criteria_Item('post_id', $postId));
+	}
+
 	protected function beforeInsert(mod_imforum_Attachment $attachment): bool {
 		if ((int) $attachment->getVar('attach_time', 'e') === 0) {
 			$attachment->setVar('attach_time', time());

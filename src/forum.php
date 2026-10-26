@@ -84,6 +84,7 @@ if ($showOnline) {
 	$online->track($permissions->getUid(), icms::$user ? (string) icms::$user->getVar('uname', 'n') : '', (string) ($_SERVER['REMOTE_ADDR'] ?? ''), $forumId, 0, $minutes);
 }
 
+$icmsTpl->assign('imforum_new_topic_url', $permissions->canStartTopic($forum) ? mod_imforum_View::link('post', ['forum' => $forumId]) : '');
 $icmsTpl->assign('imforum_breadcrumb', mod_imforum_View::breadcrumb($trail));
 $icmsTpl->assign('imforum_forum', [
 	'id' => $forumId,

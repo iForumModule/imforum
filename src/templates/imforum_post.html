@@ -1,0 +1,32 @@
+<div class="imforum">
+	<{include file="db:imforum_breadcrumb.html"}>
+	<{if $imforum_errors}>
+		<div class="errorMsg imforum-errors">
+			<{foreach from=$imforum_errors item=error}><p><{$error}></p><{/foreach}>
+		</div>
+	<{/if}>
+
+	<{if $imforum_mode == 'delete'}>
+		<h1><{$smarty.const._MD_IMFORUM_DELETE}></h1>
+		<form method="post" action="<{$imforum_delete.action}>" class="imforum-confirm">
+			<{$imforum_delete.token}>
+			<input type="hidden" name="do" value="delete" />
+			<input type="hidden" name="post" value="<{$imforum_delete.post}>" />
+			<p><{$smarty.const._MD_IMFORUM_DELETE_CONFIRM}> <strong>&ldquo;<{$imforum_delete.subject}>&rdquo;</strong></p>
+			<{if $imforum_delete.topic_deleted}><p class="imforum-notice"><{$smarty.const._MD_IMFORUM_DELETE_TOPIC}></p><{/if}>
+			<p><button type="submit"><{$smarty.const._MD_IMFORUM_DELETE}></button> <a href="<{$imforum_back}>"><{$smarty.const._MD_IMFORUM_CANCEL}></a></p>
+		</form>
+	<{else}>
+		<{if $imforum_disclaimer}><div class="imforum-disclaimer"><{$imforum_disclaimer}></div><{/if}>
+		<{if $imforum_preview}>
+			<h2><{$smarty.const._MD_IMFORUM_PREVIEW}></h2>
+			<article class="imforum-post">
+				<div class="imforum-post-body">
+					<div class="imforum-post-head"><strong><{$imforum_preview.subject}></strong></div>
+					<div class="imforum-post-text"><{$imforum_preview.text}></div>
+				</div>
+			</article>
+		<{/if}>
+		<{$imforum_form}>
+	<{/if}>
+</div>

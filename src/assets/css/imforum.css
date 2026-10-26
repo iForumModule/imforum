@@ -56,3 +56,16 @@
 	.imforum-depth-2, .imforum-depth-3, .imforum-depth-4, .imforum-depth-5,
 	.imforum-depth-6, .imforum-depth-7, .imforum-depth-8 { margin-left: 1.5em; }
 }
+
+/* writing */
+.imforum .imforum-actions { margin: 0.75em 0; }
+.imforum .imforum-button { display: inline-block; padding: 0.3em 0.9em; border: 1px solid currentColor; border-radius: 3px; text-decoration: none; font-weight: bold; }
+.imforum .imforum-prefix { font-weight: bold; }
+.imforum .imforum-post-actions { margin-top: 0.75em; text-align: right; font-size: 0.9em; }
+.imforum .imforum-post-actions a { margin-left: 0.9em; }
+.imforum .imforum-attachments ul { margin: 0.25em 0 0 1.25em; padding: 0; }
+.imforum .imforum-quickreply { margin-top: 1.5em; }
+.imforum .imforum-quickreply textarea { width: 100%; box-sizing: border-box; }
+.imforum .imforum-errors p { margin: 0.25em 0; }
+.imforum .imforum-disclaimer { margin: 0.75em 0; padding: 0.5em 0.75em; border-left: 3px solid currentColor; opacity: 0.85; }
+.imforum .imforum-confirm { margin: 1em 0; }

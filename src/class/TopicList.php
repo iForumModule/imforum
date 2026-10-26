@@ -55,6 +55,7 @@ class mod_imforum_TopicList {
 			$rows[] = [
 				'id' => $topicId,
 				'url' => mod_imforum_View::link('topic', ['topic' => $topicId]),
+				'prefix' => mod_imforum_View::prefix((int) $topic->getVar('topic_subject', 'e')),
 				'title' => $topic->getVar('topic_title'),
 				'poster' => mod_imforum_View::poster((int) $topic->getVar('topic_poster', 'e'), (string) $topic->getVar('poster_name', 'n')),
 				'time' => mod_imforum_View::time((int) $topic->getVar('topic_time', 'e')),

@@ -30,7 +30,11 @@ class mod_imforum_Post extends icms_ipf_Object {
 		$this->quickInitVar('poster_ip', XOBJ_DTYPE_TXTBOX);
 		$this->quickInitVar('post_time', XOBJ_DTYPE_LTIME, false, '', '', 0);
 		$this->quickInitVar('subject', XOBJ_DTYPE_TXTBOX, true);
-		$this->quickInitVar('post_text', XOBJ_DTYPE_TXTAREA, true);
+		// Stored as typed. XOBJ_DTYPE_TXTAREA would run the text through HTMLPurifier
+		// when it is saved, which turns BBCode into HTML for good and makes the
+		// switches of the post (HTML, smilies, line breaks) meaningless. The text
+		// is made safe when it is shown, in getFormattedText().
+		$this->quickInitVar('post_text', XOBJ_DTYPE_OTHER, true);
 		// JSON list of edits; not a PHP array var, so nothing is ever unserialised
 		$this->quickInitVar('post_edit', XOBJ_DTYPE_OTHER);
 		$this->quickInitVar('icon', XOBJ_DTYPE_TXTBOX);
