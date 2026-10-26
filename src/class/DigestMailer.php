@@ -67,6 +67,10 @@ class mod_imforum_DigestMailer {
 	 * @return array{text: string, topics: int}
 	 */
 	public static function render(array $byForum, array $forumIds, array $forumNames): array {
+		// an autotask runs in any request, also in the admin area, where the front end strings are not loaded
+		if (function_exists('icms_loadLanguageFile')) {
+			icms_loadLanguageFile(IMFORUM_DIRNAME, 'main');
+		}
 		$lines = [];
 		$topicCount = 0;
 		$left = 0;
