@@ -72,9 +72,52 @@ class mod_imforum_ReadmarkHandler extends icms_ipf_Handler {
 
 	/**
 	 * Drop read marks older than a moment; used by the cleanup task (phase 6)
+	 *
+	 * A topic without a mark counts as unread, so deleting marks by age alone
+	 * would turn every old topic into an unread one. Posts older than the
+	 * moment are therefore counted as read first: a member who has marks in a
+	 * forum gets a forum mark up to the newest post from before the moment.
+	 * Then the old marks go, together with the marks of topics that no longer
+	 * exist and the topic marks the forum mark already covers.
+	 *
+	 * @return int the number of topic marks removed
 	 */
-	public function purgeOlderThan(int $time): bool {
-		return (bool) $this->db->queryF(sprintf('DELETE FROM %s WHERE read_time < %d', $this->table, $time));
+	public function purgeOlderThan(int $time): int {
+		$posts = $this->db->prefix(IMFORUM_DIRNAME . '_post');
+		$topics = $this->db->prefix(IMFORUM_DIRNAME . '_topic');
+		$topicType = self::TYPE_TOPIC;
+		$forumType = self::TYPE_FORUM;
+
+		$newestOld = [];
+		$result = $this->db->queryF("SELECT forum_id, MAX(post_id) FROM $posts WHERE approved = 1 AND post_time < $time GROUP BY forum_id");
+		while ($result && ($row = $this->db->fetchRow($result))) {
+			$newestOld[(int) $row[0]] = (int) $row[1];
+		}
+
+		$pairs = [];
+		$result = $this->db->queryF("SELECT DISTINCT m.uid, t.forum_id FROM {$this->table} m JOIN $topics t ON t.topic_id = m.item_id WHERE m.read_type = $topicType AND m.read_time < $time");
+		while ($result && ($row = $this->db->fetchRow($result))) {
+			$pairs[] = [(int) $row[0], (int) $row[1]];
+		}
+		foreach ($pairs as [$uid, $forumId]) {
+			$upTo = $newestOld[$forumId] ?? 0;
+			$seen = $this->getLastRead($forumType, $uid, [$forumId])[$forumId] ?? 0;
+			if ($upTo > $seen) {
+				$this->markRead($forumType, $uid, $forumId, $upTo);
+			}
+		}
+
+		$removed = 0;
+		foreach ([
+			"DELETE FROM {$this->table} WHERE read_type = $topicType AND read_time < $time",
+			"DELETE m FROM {$this->table} m LEFT JOIN $topics t ON t.topic_id = m.item_id WHERE m.read_type = $topicType AND t.topic_id IS NULL",
+			"DELETE m FROM {$this->table} m JOIN $topics t ON t.topic_id = m.item_id JOIN {$this->table} f ON f.read_type = $forumType AND f.uid = m.uid AND f.item_id = t.forum_id WHERE m.read_type = $topicType AND m.post_id <= f.post_id",
+		] as $sql) {
+			if ($this->db->queryF($sql)) {
+				$removed += max(0, (int) $this->db->getAffectedRows());
+			}
+		}
+		return $removed;
 	}
 
 	/**

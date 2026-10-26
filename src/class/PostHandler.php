@@ -57,6 +57,26 @@ class mod_imforum_PostHandler extends icms_ipf_Handler {
 	}
 
 	/**
+	 * Approved posts written in a period, counted per topic, for the digest
+	 *
+	 * @return list<array{0: int, 1: int, 2: int, 3: int}> forum id, topic id, number of posts, id of the first new post; by forum, busiest topic first
+	 */
+	public function getActivity(int $since, int $until): array {
+		$topics = $this->db->prefix(IMFORUM_DIRNAME . '_topic');
+		$result = $this->db->queryF(
+			'SELECT p.forum_id, p.topic_id, COUNT(*) AS n, MIN(p.post_id) AS first_new, MAX(p.post_id) AS last_new'
+			. " FROM {$this->table} p JOIN $topics t ON t.topic_id = p.topic_id"
+			. ' WHERE p.approved = 1 AND t.approved = 1 AND p.post_time >= ' . $since . ' AND p.post_time < ' . $until
+			. ' GROUP BY p.forum_id, p.topic_id ORDER BY p.forum_id, last_new DESC'
+		);
+		$rows = [];
+		while ($result && ($row = $this->db->fetchRow($result))) {
+			$rows[] = [(int) $row[0], (int) $row[1], (int) $row[2], (int) $row[3]];
+		}
+		return $rows;
+	}
+
+	/**
 	 * One page of the approved posts of a topic, oldest first
 	 *
 	 * @return array<int, mod_imforum_Post> by post id

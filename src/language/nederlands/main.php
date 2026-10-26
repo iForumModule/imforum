@@ -128,3 +128,6 @@ define('_MD_IMFORUM_MOD_ERR_SPLIT_FIRST', 'Het eerste bericht kan geen nieuw ond
 define('_MD_IMFORUM_MOD_ERR_SUSPEND_WHO', 'Kies een ander lid dan uzelf.');
 define('_MD_IMFORUM_MOD_ERR_SUSPEND_DAYS', 'Kies tussen 1 en %d dagen.');
 define('_MD_IMFORUM_MOD_ERR_SUSPEND_MOD', 'Moderatoren en webmasters kunnen niet geschorst worden.');
+define('_MD_IMFORUM_DIGEST_NEW_TOPIC', 'nieuw onderwerp');
+define('_MD_IMFORUM_DIGEST_POSTS', '%d nieuwe berichten');
+define('_MD_IMFORUM_DIGEST_MORE', 'En nog %d onderwerpen:');
