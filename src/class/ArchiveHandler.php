@@ -29,17 +29,15 @@ class mod_imforum_ArchiveHandler extends icms_ipf_Handler {
 		if (!$forumIds) {
 			return ['rows' => [], 'total' => 0];
 		}
-		$topics = $this->db->prefix(IMFORUM_DIRNAME . '_topic');
-		$from = " FROM {$this->table} a JOIN $topics t ON t.topic_id = a.topic_id WHERE t.forum_id IN (" . implode(',', $forumIds) . ')';
+		$topics = mod_imforum_Db::table('topic');
+		$from = " FROM {$this->table} a JOIN $topics t ON t.topic_id = a.topic_id WHERE t.forum_id IN (" . mod_imforum_Db::marks($forumIds) . ')';
 
-		$total = 0;
-		$result = $this->db->queryF("SELECT COUNT(DISTINCT a.topic_id)$from");
-		if ($result && ($row = $this->db->fetchRow($result))) {
-			$total = (int) $row[0];
-		}
+		$total = mod_imforum_Db::value("SELECT COUNT(DISTINCT a.topic_id)$from", $forumIds);
 		$rows = [];
-		$result = $this->db->queryF("SELECT a.topic_id, COUNT(*), MAX(a.archived_time)$from GROUP BY a.topic_id ORDER BY MAX(a.archived_time) DESC, a.topic_id DESC LIMIT " . max(0, $start) . ', ' . max(1, $limit));
-		while ($result && ($row = $this->db->fetchRow($result))) {
+		foreach (mod_imforum_Db::rows(
+			"SELECT a.topic_id, COUNT(*), MAX(a.archived_time)$from GROUP BY a.topic_id ORDER BY MAX(a.archived_time) DESC, a.topic_id DESC LIMIT ?, ?",
+			[...$forumIds, max(0, $start), max(1, $limit)]
+		) as $row) {
 			$rows[] = ['topic_id' => (int) $row[0], 'posts' => (int) $row[1], 'archived_time' => (int) $row[2]];
 		}
 		return ['rows' => $rows, 'total' => $total];

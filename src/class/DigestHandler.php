@@ -22,9 +22,7 @@ class mod_imforum_DigestHandler extends icms_ipf_Handler {
 	 * Time of the most recent digest, 0 if none was sent yet
 	 */
 	public function getLastDigestTime(): int {
-		$result = $this->db->queryF("SELECT MAX(digest_time) FROM {$this->table}");
-		$row = $result ? $this->db->fetchRow($result) : false;
-		return $row ? (int) $row[0] : 0;
+		return mod_imforum_Db::value("SELECT MAX(digest_time) FROM {$this->table}");
 	}
 
 	protected function beforeInsert(mod_imforum_Digest $digest): bool {

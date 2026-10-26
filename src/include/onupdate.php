@@ -104,16 +104,15 @@ function imforum_indexes(): array {
  * @param string $type '' for a regular index, 'UNIQUE' or 'FULLTEXT'
  */
 function imforum_add_index(string $item, string $name, array $columns, string $type = ''): bool {
-	$db = icms::$xoopsDB;
-	$table = $db->prefix(IMFORUM_DIRNAME . '_' . $item);
+	$table = mod_imforum_Db::table($item);
 
-	$result = $db->queryF("SHOW INDEX FROM `$table` WHERE Key_name = " . $db->quoteString($name));
-	$exists = $result ? $db->getRowsNum($result) > 0 : false;
-	if ($exists) {
-		return true;
+	// column 2 of SHOW INDEX is the name of the index
+	foreach (mod_imforum_Db::rows("SHOW INDEX FROM `$table`") as $index) {
+		if ($index[2] === $name) {
+			return true;
+		}
 	}
-	$sql = sprintf('ALTER TABLE `%s` ADD %s INDEX `%s` (`%s`)', $table, $type, $name, implode('`, `', $columns));
-	return (bool) $db->queryF($sql);
+	return mod_imforum_Db::ok(sprintf('ALTER TABLE `%s` ADD %s INDEX `%s` (`%s`)', $table, $type, $name, implode('`, `', $columns)));
 }
 
 /**

@@ -38,13 +38,6 @@ class mod_imforum_ModerationService {
 		return ['ok' => $ok, 'errors' => $ok || $error === '' ? [] : [$error]];
 	}
 
-	/**
-	 * A write that has already been allowed
-	 */
-	private function run(string $sql): bool {
-		return (bool) icms::$xoopsDB->queryF($sql);
-	}
-
 	private function mayModerate(int $forumId): bool {
 		$forum = $this->permissions->getForum($forumId);
 		return $forum !== null && $this->permissions->canModerate($forum);
@@ -142,13 +135,11 @@ class mod_imforum_ModerationService {
 			return $fail(_MD_IMFORUM_MOD_ERR_SAME_TOPIC);
 		}
 
-		$db = icms::$xoopsDB;
-		$posts = $db->prefix(IMFORUM_DIRNAME . '_post');
-		$topicTable = $db->prefix(IMFORUM_DIRNAME . '_topic');
-		$ok = $this->run("UPDATE $posts SET topic_id = $targetId, forum_id = $targetForum WHERE topic_id = $sourceId");
-		$views = (int) $source->getVar('topic_views', 'e');
-		$ok = $this->run("UPDATE $topicTable SET topic_views = topic_views + $views WHERE topic_id = $targetId") && $ok;
-		$ok = $this->run("DELETE FROM $topicTable WHERE topic_id = $sourceId") && $ok;
+		$posts = mod_imforum_Db::table('post');
+		$topicTable = mod_imforum_Db::table('topic');
+		$ok = mod_imforum_Db::ok("UPDATE $posts SET topic_id = ?, forum_id = ? WHERE topic_id = ?", [$targetId, $targetForum, $sourceId]);
+		$ok = mod_imforum_Db::ok("UPDATE $topicTable SET topic_views = topic_views + ? WHERE topic_id = ?", [(int) $source->getVar('topic_views', 'e'), $targetId]) && $ok;
+		$ok = mod_imforum_Db::ok("DELETE FROM $topicTable WHERE topic_id = ?", [$sourceId]) && $ok;
 		icms_getModuleHandler('readmark', IMFORUM_DIRNAME)->deleteByItem(mod_imforum_ReadmarkHandler::TYPE_TOPIC, $sourceId);
 
 		$ok = self::topics()->synchronise($targetId) && $ok;
@@ -184,11 +175,8 @@ class mod_imforum_ModerationService {
 		$postId = (int) $post->id();
 		$oldId = (int) $oldTopic->id();
 
-		$db = icms::$xoopsDB;
-		$posts = $db->prefix(IMFORUM_DIRNAME . '_post');
-		$result = $db->queryF("SELECT MIN(post_id) FROM $posts WHERE topic_id = $oldId");
-		$row = $result ? $db->fetchRow($result) : false;
-		if ($row && (int) $row[0] === $postId) {
+		$posts = mod_imforum_Db::table('post');
+		if (mod_imforum_Db::value("SELECT MIN(post_id) FROM $posts WHERE topic_id = ?", [$oldId]) === $postId) {
 			return $fail(_MD_IMFORUM_MOD_ERR_SPLIT_FIRST);
 		}
 
@@ -204,9 +192,9 @@ class mod_imforum_ModerationService {
 		}
 		$newId = (int) $topic->id();
 
-		$ok = $this->run("UPDATE $posts SET topic_id = $newId WHERE topic_id = $oldId AND post_id >= $postId");
-		$ok = $this->run("UPDATE $posts SET pid = 0 WHERE post_id = $postId") && $ok;
-		$ok = $this->run("UPDATE $posts SET pid = $postId WHERE topic_id = $newId AND post_id > $postId AND pid < $postId") && $ok;
+		$ok = mod_imforum_Db::ok("UPDATE $posts SET topic_id = ? WHERE topic_id = ? AND post_id >= ?", [$newId, $oldId, $postId]);
+		$ok = mod_imforum_Db::ok("UPDATE $posts SET pid = 0 WHERE post_id = ?", [$postId]) && $ok;
+		$ok = mod_imforum_Db::ok("UPDATE $posts SET pid = ? WHERE topic_id = ? AND post_id > ? AND pid < ?", [$postId, $newId, $postId, $postId]) && $ok;
 		$ok = self::topics()->synchronise($oldId) && $ok;
 		$ok = self::topics()->synchronise($newId) && $ok;
 		$ok = self::forums()->synchronise($forumId) && $ok;
@@ -264,10 +252,7 @@ class mod_imforum_ModerationService {
 	}
 
 	private function firstPostId(int $topicId): int {
-		$db = icms::$xoopsDB;
-		$result = $db->queryF('SELECT MIN(post_id) FROM ' . $db->prefix(IMFORUM_DIRNAME . '_post') . " WHERE topic_id = $topicId");
-		$row = $result ? $db->fetchRow($result) : false;
-		return $row ? (int) $row[0] : 0;
+		return mod_imforum_Db::value('SELECT MIN(post_id) FROM ' . mod_imforum_Db::table('post') . ' WHERE topic_id = ?', [$topicId]);
 	}
 
 	/**
