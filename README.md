@@ -2,7 +2,7 @@
 
 Community forum module for ImpressCMS 2.0, built on the ImpressCMS Persistable Framework (IPF). imforum is the successor of iForum: same features, new code, and an importer that takes over the data of a running iForum installation.
 
-Status: phase 2 (administration). Categories, forums, moderators, group permissions, reports, suspensions, digests, the archive and pruning are managed from the admin area. There are no forum pages for visitors yet.
+Status: phase 3 (reading). Visitors can read the forum index, forums, topics (flat or threaded), the latest, unread and featured topics, the archive and an RSS feed, and search the forums. Everything is filtered by the group permissions, read marks, karma and required replies are applied, and three blocks are available. Posting, editing and moderating from the front end come in later phases. Categories, forums, moderators, permissions, reports, suspensions, digests, the archive and pruning are managed from the admin area.
 
 ## Requirements
 

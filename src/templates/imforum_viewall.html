@@ -1,0 +1,19 @@
+<div class="imforum">
+	<{include file="db:imforum_breadcrumb.html"}>
+	<h1><{$imforum_title}></h1>
+	<p class="imforum-tools">
+		<{foreach from=$imforum_filters item=filter name=filters}>
+			<{if !$filter.members_only || $imforum_is_member}>
+				<{if $filter.active}><strong><{$filter.title}></strong><{else}><a href="<{$filter.url}>"><{$filter.title}></a><{/if}>
+				<{if !$smarty.foreach.filters.last}>&middot;<{/if}>
+			<{/if}>
+		<{/foreach}>
+	</p>
+	<{if $imforum_topics}>
+		<{$imforum_pager}>
+		<{include file="db:imforum_topiclist.html"}>
+		<{$imforum_pager}>
+	<{else}>
+		<p><{$smarty.const._MD_IMFORUM_NO_TOPICS}></p>
+	<{/if}>
+</div>

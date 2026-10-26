@@ -1,0 +1,48 @@
+<div class="imforum">
+	<{include file="db:imforum_breadcrumb.html"}>
+	<h1><{$imforum_forum.name}></h1>
+	<{if $imforum_forum.description}><p class="imforum-meta"><{$imforum_forum.description}></p><{/if}>
+	<{if $imforum_forum.inactive}><p class="imforum-notice"><{$smarty.const._MD_IMFORUM_FORUM_INACTIVE}></p><{/if}>
+	<{if $imforum_moderators}>
+		<p class="imforum-meta"><{$smarty.const._MD_IMFORUM_MODERATORS}>: <{foreach from=$imforum_moderators item=moderator name=mods}><{$moderator}><{if !$smarty.foreach.mods.last}>, <{/if}><{/foreach}></p>
+	<{/if}>
+
+	<{if $imforum_subforums}>
+	<table class="outer imforum-category">
+		<thead>
+			<tr><th class="head" colspan="3"><{$smarty.const._MD_IMFORUM_SUBFORUMS}></th></tr>
+		</thead>
+		<tbody>
+		<{foreach from=$imforum_subforums item=sub}>
+			<tr class="<{cycle values="odd,even"}>">
+				<td>
+					<a href="<{$sub.url}>"><strong><{$sub.name}></strong></a>
+					<{if $sub.unread}><span class="imforum-badge imforum-new"><{$sub.unread}> <{$smarty.const._MD_IMFORUM_UNREAD}></span><{/if}>
+					<{if $sub.description}><div class="imforum-meta"><{$sub.description}></div><{/if}>
+				</td>
+				<td class="imforum-num"><{$sub.topics}> <{$smarty.const._MD_IMFORUM_TOPICS}></td>
+				<td class="imforum-num"><{$sub.posts}> <{$smarty.const._MD_IMFORUM_POSTS}></td>
+			</tr>
+		<{/foreach}>
+		</tbody>
+	</table>
+	<{/if}>
+
+	<{if $imforum_topics}>
+		<{$imforum_pager}>
+		<{include file="db:imforum_topiclist.html"}>
+		<{$imforum_pager}>
+	<{else}>
+		<p><{$smarty.const._MD_IMFORUM_NO_TOPICS}></p>
+	<{/if}>
+
+	<{if $imforum_can_mark_read}>
+	<form method="post" action="<{$imforum_form_action}>" class="imforum-markread">
+		<input type="hidden" name="op" value="markread" />
+		<{$imforum_token}>
+		<button type="submit"><{$smarty.const._MD_IMFORUM_MARK_READ}></button>
+	</form>
+	<{/if}>
+
+	<{include file="db:imforum_online.html"}>
+</div>

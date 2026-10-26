@@ -1,0 +1,5 @@
+<ol class="imforum-block">
+	<{foreach from=$block.posters item=poster}>
+	<li><{$poster.member}> <span class="imforum-meta"><{$poster.posts}> <{$smarty.const._MD_IMFORUM_POSTS}></span></li>
+	<{/foreach}>
+</ol>

@@ -1,0 +1,6 @@
+<nav class="imforum-breadcrumb" aria-label="<{$smarty.const._MD_IMFORUM_PATH}>">
+	<{foreach from=$imforum_breadcrumb item=crumb name=crumbs}>
+		<{if $crumb.url}><a href="<{$crumb.url}>"><{$crumb.title}></a><{else}><span><{$crumb.title}></span><{/if}>
+		<{if !$smarty.foreach.crumbs.last}><span class="imforum-sep">&raquo;</span><{/if}>
+	<{/foreach}>
+</nav>

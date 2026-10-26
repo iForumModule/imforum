@@ -50,6 +50,169 @@ class mod_imforum_PostHandler extends icms_ipf_Handler {
 		icms_getModuleHandler('report', IMFORUM_DIRNAME)->deleteAll($byPost);
 	}
 
+	private function approvedIn(int $topicId): icms_db_criteria_Compo {
+		$criteria = new icms_db_criteria_Compo(new icms_db_criteria_Item('topic_id', $topicId));
+		$criteria->add(new icms_db_criteria_Item('approved', 1));
+		return $criteria;
+	}
+
+	/**
+	 * One page of the approved posts of a topic, oldest first
+	 *
+	 * @return array<int, mod_imforum_Post> by post id
+	 */
+	public function getPage(int $topicId, int $start, int $limit): array {
+		$criteria = $this->approvedIn($topicId);
+		$criteria->setSort('post_id');
+		$criteria->setOrder('ASC');
+		$criteria->setStart($start);
+		$criteria->setLimit($limit);
+		return $this->getObjects($criteria, true);
+	}
+
+	public function countApproved(int $topicId): int {
+		return (int) $this->getCount($this->approvedIn($topicId));
+	}
+
+	/**
+	 * The approved posts of a topic in thread order: every reply under the post it answers
+	 *
+	 * A reply whose parent is missing or not approved counts as a first level
+	 * post, so nothing disappears from the thread.
+	 *
+	 * @return list<array{post_id: int, depth: int}>
+	 */
+	public function getThreadOrder(int $topicId): array {
+		$parentOf = [];
+		$result = $this->db->queryF("SELECT post_id, pid FROM {$this->table} WHERE topic_id = $topicId AND approved = 1 ORDER BY post_id");
+		while ($result && ($row = $this->db->fetchRow($result))) {
+			$parentOf[(int) $row[0]] = (int) $row[1];
+		}
+
+		$children = [];
+		foreach ($parentOf as $postId => $parent) {
+			$children[isset($parentOf[$parent]) && $parent !== $postId ? $parent : 0][] = $postId;
+		}
+
+		$order = [];
+		$seen = [];
+		$stack = [];
+		foreach (array_reverse($children[0] ?? []) as $root) {
+			$stack[] = [$root, 0];
+		}
+		while ($stack) {
+			[$postId, $depth] = array_pop($stack);
+			if (isset($seen[$postId])) {
+				continue;
+			}
+			$seen[$postId] = true;
+			$order[] = ['post_id' => $postId, 'depth' => $depth];
+			foreach (array_reverse($children[$postId] ?? []) as $child) {
+				$stack[] = [$child, $depth + 1];
+			}
+		}
+		// posts that only point at each other form a loop without a root
+		foreach (array_diff_key($parentOf, $seen) as $postId => $parent) {
+			$order[] = ['post_id' => $postId, 'depth' => 0];
+		}
+		return $order;
+	}
+
+	/**
+	 * Posts by id, in the order of the ids; unknown ids are left out
+	 *
+	 * @param list<int> $postIds
+	 * @return array<int, mod_imforum_Post>
+	 */
+	public function getByIds(array $postIds): array {
+		$postIds = array_values(array_filter(array_map('intval', $postIds)));
+		if (!$postIds) {
+			return [];
+		}
+		$found = $this->getObjects(new icms_db_criteria_Item('post_id', '(' . implode(',', $postIds) . ')', 'IN'), true);
+		$ordered = [];
+		foreach ($postIds as $postId) {
+			if (isset($found[$postId])) {
+				$ordered[$postId] = $found[$postId];
+			}
+		}
+		return $ordered;
+	}
+
+	/**
+	 * Number of approved posts per member
+	 *
+	 * @param list<int> $uids
+	 * @return array<int, int> uid => posts; members without posts are left out
+	 */
+	public function countByUsers(array $uids): array {
+		$uids = array_values(array_filter(array_map('intval', $uids), static fn (int $uid): bool => $uid > 0));
+		if (!$uids) {
+			return [];
+		}
+		$counts = [];
+		$result = $this->db->queryF('SELECT uid, COUNT(*) FROM ' . $this->table . ' WHERE approved = 1 AND uid IN (' . implode(',', $uids) . ') GROUP BY uid');
+		while ($result && ($row = $this->db->fetchRow($result))) {
+			$counts[(int) $row[0]] = (int) $row[1];
+		}
+		return $counts;
+	}
+
+	/**
+	 * The members with the most approved posts
+	 *
+	 * @param list<int> $forumIds the forums the reader may open
+	 * @return list<array{uid: int, posts: int}>
+	 */
+	public function getTopPosters(array $forumIds, int $limit): array {
+		$forumIds = array_values(array_filter(array_map('intval', $forumIds)));
+		if (!$forumIds) {
+			return [];
+		}
+		$top = [];
+		$result = $this->db->queryF('SELECT uid, COUNT(*) AS n FROM ' . $this->table . ' WHERE approved = 1 AND uid > 0 AND forum_id IN (' . implode(',', $forumIds) . ') GROUP BY uid ORDER BY n DESC, uid ASC LIMIT ' . max(1, $limit));
+		while ($result && ($row = $this->db->fetchRow($result))) {
+			$top[] = ['uid' => (int) $row[0], 'posts' => (int) $row[1]];
+		}
+		return $top;
+	}
+
+	public function hasPosted(int $topicId, int $uid): bool {
+		$criteria = $this->approvedIn($topicId);
+		$criteria->add(new icms_db_criteria_Item('uid', $uid));
+		return $uid > 0 && $this->getCount($criteria) > 0;
+	}
+
+	/**
+	 * Who wrote what and when, without the texts; for the lists of topics
+	 *
+	 * @param list<int> $postIds
+	 * @return array<int, array{post_id: int, topic_id: int, uid: int, poster_name: string, post_time: int, subject: string}>
+	 */
+	public function getSummaries(array $postIds): array {
+		$postIds = array_values(array_filter(array_map('intval', $postIds)));
+		$summaries = [];
+		foreach (array_chunk($postIds, 500) as $chunk) {
+			$result = $this->db->queryF('SELECT post_id, topic_id, uid, poster_name, post_time, subject FROM ' . $this->table . ' WHERE post_id IN (' . implode(',', $chunk) . ')');
+			while ($result && ($row = $this->db->fetchRow($result))) {
+				$summaries[(int) $row[0]] = [
+					'post_id' => (int) $row[0], 'topic_id' => (int) $row[1], 'uid' => (int) $row[2],
+					'poster_name' => (string) $row[3], 'post_time' => (int) $row[4], 'subject' => (string) $row[5],
+				];
+			}
+		}
+		return $summaries;
+	}
+
+	/**
+	 * How many approved posts of a topic come before a post
+	 */
+	public function getPosition(int $topicId, int $postId): int {
+		$criteria = $this->approvedIn($topicId);
+		$criteria->add(new icms_db_criteria_Item('post_id', $postId, '<'));
+		return (int) $this->getCount($criteria);
+	}
+
 	protected function beforeInsert(mod_imforum_Post $post): bool {
 		if ((int) $post->getVar('post_time', 'e') === 0) {
 			$post->setVar('post_time', time());

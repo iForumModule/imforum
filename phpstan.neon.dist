@@ -34,3 +34,19 @@ parameters:
             # icms_db_legacy_IDatabase::queryF() documents a resource, but returns false when the query fails
             identifier: ternary.alwaysTrue
             path: src/include/onupdate.php
+        -
+            # icms_core_DataFilter::filterTextareaDisplay() documents bool switches but compares them
+            # with != 0 and !== 0, so false would still convert line breaks: the post's 0/1 flags go in as they are
+            message: '#^Parameter \#[2-5] \$(smiley|icode|image|br) of static method icms_core_DataFilter::filterTextareaDisplay\(\) expects bool, int given\.$#'
+            identifier: argument.type
+        -
+            # formatTimestamp() documents a string, but takes the integer timestamps that every caller passes
+            message: '#^Parameter \#1 \$time of function formatTimestamp expects string, int#'
+            identifier: argument.type
+        -
+            # icms::$user is documented as an object, but it is null for guests
+            identifier: ternary.alwaysTrue
+            path: src/*.php
+        -
+            identifier: function.alreadyNarrowedType
+            message: '#^Call to function is_object\(\) with icms_member_user_Object#'

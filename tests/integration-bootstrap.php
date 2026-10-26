@@ -50,9 +50,10 @@ $copy(dirname(__DIR__) . '/src', $root . '/modules/imforum');
 define('ICMS_ROOT_PATH', $root);
 define('ICMS_TRUST_PATH', $sandbox . '/trust');
 define('ICMS_URL', 'http://localhost');
-define('ICMS_GROUP_ADMIN', 1);
-define('ICMS_GROUP_USERS', 2);
-define('ICMS_GROUP_ANONYMOUS', 3);
+// The core defines the group constants as strings
+define('ICMS_GROUP_ADMIN', '1');
+define('ICMS_GROUP_USERS', '2');
+define('ICMS_GROUP_ANONYMOUS', '3');
 mkdir(ICMS_TRUST_PATH . '/cache/htmlpurifier', 0755, true);
 require_once ICMS_ROOT_PATH . '/include/constants.php';
 

@@ -1,0 +1,53 @@
+<div class="imforum">
+	<{include file="db:imforum_breadcrumb.html"}>
+	<h1><{$imforum_topic.title}><{if $imforum_topic.locked}> <span class="imforum-badge"><{$smarty.const._MD_IMFORUM_LOCKED}></span><{/if}></h1>
+	<p class="imforum-tools">
+		<{$imforum_topic.replies}> <{$smarty.const._MD_IMFORUM_REPLIES}>, <{$imforum_topic.views}> <{$smarty.const._MD_IMFORUM_VIEWS}>
+		&middot;
+		<{if $imforum_mode == 'tree'}><a href="<{$imforum_flat_url}>"><{$smarty.const._MD_IMFORUM_VIEW_FLAT}></a> | <strong><{$smarty.const._MD_IMFORUM_VIEW_TREE}></strong>
+		<{else}><strong><{$smarty.const._MD_IMFORUM_VIEW_FLAT}></strong> | <a href="<{$imforum_tree_url}>"><{$smarty.const._MD_IMFORUM_VIEW_TREE}></a><{/if}>
+	</p>
+
+	<{$imforum_pager}>
+	<{foreach from=$imforum_posts item=post}>
+	<article class="imforum-post imforum-depth-<{$post.depth}>" id="post-<{$post.post_id}>">
+		<aside class="imforum-poster">
+			<{if $post.poster}>
+				<{if $post.poster.avatar}><img class="imforum-avatar" src="<{$post.poster.avatar}>" alt="" /><{/if}>
+				<strong><a href="<{$post.poster.url}>"><{$post.poster.name}></a></strong>
+				<{if $post.poster.online}><span class="imforum-badge imforum-new" title="<{$smarty.const._MD_IMFORUM_ONLINE_NOW}>">&#9679;</span><{/if}>
+				<{if $post.poster.rank_title}><div class="imforum-meta"><{if $post.poster.rank_image}><img src="<{$post.poster.rank_image}>" alt="" /><{/if}> <{$post.poster.rank_title}></div><{/if}>
+				<{if $post.poster.groups}><div class="imforum-meta"><{foreach from=$post.poster.groups item=group name=groups}><{$group}><{if !$smarty.foreach.groups.last}>, <{/if}><{/foreach}></div><{/if}>
+				<div class="imforum-meta"><{$smarty.const._MD_IMFORUM_POSTS}>: <{$post.poster.posts}></div>
+				<div class="imforum-meta"><{$smarty.const._MD_IMFORUM_JOINED}>: <{$post.poster.regdate}></div>
+			<{else}>
+				<strong><{$post.author}></strong>
+			<{/if}>
+		</aside>
+		<div class="imforum-post-body">
+			<div class="imforum-post-head">
+				<a href="<{$post.url}>" class="imforum-permalink">#<{$post.post_id}></a>
+				<strong><{$post.subject}></strong>
+				<span class="imforum-meta"><{$post.time}></span>
+			</div>
+			<div class="imforum-post-text">
+				<{if $post.locked}>
+					<p class="imforum-notice"><{if $post.lock == 'karma'}><{$smarty.const._MD_IMFORUM_LOCK_KARMA}><{else}><{$smarty.const._MD_IMFORUM_LOCK_REPLY}><{/if}></p>
+				<{else}>
+					<{$post.text}>
+				<{/if}>
+			</div>
+			<{if $post.signature}><div class="imforum-signature"><{$post.signature}></div><{/if}>
+			<{if $post.edits}>
+				<div class="imforum-meta"><{$smarty.const._MD_IMFORUM_EDITED_BY}>
+					<{foreach from=$post.edits item=edit name=edits}><{$edit.name}> (<{$edit.time}>)<{if !$smarty.foreach.edits.last}>, <{/if}><{/foreach}>
+				</div>
+			<{/if}>
+		</div>
+	</article>
+	<{/foreach}>
+	<{$imforum_pager}>
+
+	<p><a href="<{$imforum_topic.forum_url}>">&laquo; <{$imforum_topic.forum_name}></a></p>
+	<{include file="db:imforum_online.html"}>
+</div>
