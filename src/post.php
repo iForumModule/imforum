@@ -191,7 +191,8 @@ if ($mode === 'delete') {
 		foreach (['subject', 'post_text'] as $field) {
 			$sample->setVar($field, is_string($values[$field] ?? null) ? $values[$field] : '');
 		}
-		$sample->setVar('dohtml', (int) $forum->getVar('allow_html', 'e') === 1 && !empty($values['dohtml']) ? 1 : 0);
+		$sample->setVar('dohtml', !empty($values['wysiwyg']) || ((int) $forum->getVar('allow_html', 'e') === 1 && !empty($values['dohtml'])) ? 1 : 0);
+		$values['dobr'] = empty($values['wysiwyg']) ? ($values['dobr'] ?? 0) : 0;
 		foreach (['dosmiley', 'doxcode', 'doimage', 'dobr'] as $field) {
 			$sample->setVar($field, !empty($values[$field]) ? 1 : 0);
 		}
