@@ -7,6 +7,13 @@
 		<p class="imforum-meta"><{$smarty.const._MD_IMFORUM_MODERATORS}>: <{foreach from=$imforum_moderators item=moderator name=mods}><{$moderator}><{if !$smarty.foreach.mods.last}>, <{/if}><{/foreach}></p>
 	<{/if}>
 
+	<{if $imforum_mod_links}>
+		<p class="imforum-modtools"><strong><{$smarty.const._MD_IMFORUM_MODERATION}>:</strong>
+			<a href="<{$imforum_mod_links.pending.url}>"><{$smarty.const._MD_IMFORUM_MOD_PENDING}> (<{$imforum_mod_links.pending.count}>)</a>
+			<a href="<{$imforum_mod_links.reports.url}>"><{$smarty.const._MD_IMFORUM_MOD_REPORTS}> (<{$imforum_mod_links.reports.count}>)</a>
+		</p>
+	<{/if}>
+
 	<{if $imforum_subforums}>
 	<table class="outer imforum-category">
 		<thead>

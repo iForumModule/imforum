@@ -69,3 +69,5 @@
 .imforum .imforum-errors p { margin: 0.25em 0; }
 .imforum .imforum-disclaimer { margin: 0.75em 0; padding: 0.5em 0.75em; border-left: 3px solid currentColor; opacity: 0.85; }
 .imforum .imforum-confirm { margin: 1em 0; }
+.imforum .imforum-modtools { margin: 0.5em 0; }
+.imforum .imforum-modtools a { margin-right: 0.75em; }

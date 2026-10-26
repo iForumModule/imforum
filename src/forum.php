@@ -95,6 +95,10 @@ $icmsTpl->assign('imforum_forum', [
 $icmsTpl->assign('imforum_subforums', $subforums);
 $icmsTpl->assign('imforum_topics', $rows);
 $icmsTpl->assign('imforum_moderators', $moderators);
+$icmsTpl->assign('imforum_mod_links', $permissions->canModerate($forum) ? [
+	'pending' => ['url' => mod_imforum_View::link('moderate', ['do' => 'pending', 'forum' => $forumId]), 'count' => icms_getModuleHandler('post', IMFORUM_DIRNAME)->countPending($forumId)],
+	'reports' => ['url' => mod_imforum_View::link('moderate', ['do' => 'reports', 'forum' => $forumId]), 'count' => icms_getModuleHandler('report', IMFORUM_DIRNAME)->countOpenInForum($forumId)],
+] : null);
 $icmsTpl->assign('imforum_pager', mod_imforum_View::pager('forum', ['forum' => $forumId], $total, $perPage, $start));
 $icmsTpl->assign('imforum_can_mark_read', $tracker->isTracking());
 $icmsTpl->assign('imforum_token', icms::$security->getTokenHTML());

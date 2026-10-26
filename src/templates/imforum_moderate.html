@@ -1,0 +1,97 @@
+<div class="imforum">
+	<{include file="db:imforum_breadcrumb.html"}>
+	<h1><{$imforum_mod_title}></h1>
+	<{if $imforum_errors}>
+		<div class="errorMsg imforum-errors">
+			<{foreach from=$imforum_errors item=error}><p><{$error}></p><{/foreach}>
+		</div>
+	<{/if}>
+
+	<{if $imforum_mod_do == 'pending'}>
+		<{if $imforum_mod_rows}>
+		<table class="outer imforum-category">
+			<thead><tr><th class="head"><{$smarty.const._MD_IMFORUM_MOD_WAITING}></th><th class="head"></th></tr></thead>
+			<tbody>
+			<{foreach from=$imforum_mod_rows item=row}>
+				<tr class="<{cycle values="odd,even"}>">
+					<td>
+						<strong><{$row.subject}></strong> <span class="imforum-meta">(<{$row.topic}>)</span>
+						<div class="imforum-meta"><{$row.author}> &middot; <{$row.time}></div>
+						<div><{$row.excerpt}></div>
+					</td>
+					<td class="imforum-num">
+						<a href="<{$row.approve_url}>"><{$smarty.const._MD_IMFORUM_MOD_APPROVE}></a>
+						<a href="<{$row.delete_url}>"><{$smarty.const._MD_IMFORUM_DELETE}></a>
+						<{if $row.suspend_url}><a href="<{$row.suspend_url}>"><{$smarty.const._MD_IMFORUM_MOD_SUSPEND}></a><{/if}>
+					</td>
+				</tr>
+			<{/foreach}>
+			</tbody>
+		</table>
+		<{else}>
+			<p><{$smarty.const._MD_IMFORUM_MOD_NONE_WAITING}></p>
+		<{/if}>
+		<p><a href="<{$imforum_back}>">&laquo; <{$smarty.const._MD_IMFORUM_BACK}></a></p>
+
+	<{elseif $imforum_mod_do == 'reports'}>
+		<{if $imforum_mod_rows}>
+		<table class="outer imforum-category">
+			<thead><tr><th class="head"><{$smarty.const._MD_IMFORUM_MOD_REPORTED}></th><th class="head"></th></tr></thead>
+			<tbody>
+			<{foreach from=$imforum_mod_rows item=row}>
+				<tr class="<{cycle values="odd,even"}>">
+					<td>
+						<a href="<{$row.post_url}>"><strong><{$row.subject}></strong></a>
+						<div class="imforum-meta"><{$row.reporter}> &middot; <{$row.time}></div>
+						<div><{$row.text}></div>
+					</td>
+					<td class="imforum-num"><a href="<{$row.handle_url}>"><{$smarty.const._MD_IMFORUM_MOD_HANDLE}></a></td>
+				</tr>
+			<{/foreach}>
+			</tbody>
+		</table>
+		<{else}>
+			<p><{$smarty.const._MD_IMFORUM_MOD_NONE_REPORTS}></p>
+		<{/if}>
+		<p><a href="<{$imforum_back}>">&laquo; <{$smarty.const._MD_IMFORUM_BACK}></a></p>
+
+	<{else}>
+		<form method="post" action="<{$imforum_mod_form.action}>" class="imforum-confirm">
+			<{$imforum_mod_form.token}>
+			<input type="hidden" name="do" value="<{$imforum_mod_form.do}>" />
+			<{if $imforum_mod_form.topic}><input type="hidden" name="topic" value="<{$imforum_mod_form.topic}>" /><{/if}>
+			<{if $imforum_mod_form.post}><input type="hidden" name="post" value="<{$imforum_mod_form.post}>" /><{/if}>
+			<{if $imforum_mod_form.report}><input type="hidden" name="report" value="<{$imforum_mod_form.report}>" /><{/if}>
+			<p><strong>&ldquo;<{$imforum_mod_form.subject}>&rdquo;</strong></p>
+
+			<{if $imforum_mod_do == 'move'}>
+				<p><label><{$smarty.const._MD_IMFORUM_MOD_TARGET_FORUM}>
+					<select name="target_forum">
+					<{foreach from=$imforum_mod_form.forums item=target}><option value="<{$target.id}>"><{$target.name}></option><{/foreach}>
+					</select></label></p>
+			<{elseif $imforum_mod_do == 'merge'}>
+				<p><label><{$smarty.const._MD_IMFORUM_MOD_TARGET_TOPIC}> <input type="number" min="1" name="target_topic" value="<{$imforum_mod_form.values.target_topic}>" required="required" /></label></p>
+				<p class="imforum-meta"><{$smarty.const._MD_IMFORUM_MOD_MERGE_HELP}></p>
+			<{elseif $imforum_mod_do == 'split'}>
+				<p><label><{$smarty.const._MD_IMFORUM_MOD_NEW_TITLE}> <input type="text" name="title" maxlength="100" size="50" value="<{$imforum_mod_form.values.title}>" required="required" /></label></p>
+				<p class="imforum-meta"><{$smarty.const._MD_IMFORUM_MOD_SPLIT_HELP}></p>
+			<{elseif $imforum_mod_do == 'suspend'}>
+				<p><{$smarty.const._MD_IMFORUM_MOD_SUSPEND_WHO}>: <{$imforum_mod_form.author}></p>
+				<p><label><{$smarty.const._MD_IMFORUM_MOD_DAYS}> <input type="number" min="1" max="3650" name="days" value="<{$imforum_mod_form.values.days}>" required="required" /></label></p>
+				<p><label><{$smarty.const._MD_IMFORUM_MOD_REASON}><br /><textarea name="description" rows="3" cols="50"><{$imforum_mod_form.values.description}></textarea></label></p>
+			<{elseif $imforum_mod_do == 'handle'}>
+				<blockquote><{$imforum_mod_form.text}></blockquote>
+				<p><label><{$smarty.const._MD_IMFORUM_MOD_MEMO}><br /><textarea name="memo" rows="3" cols="50"><{$imforum_mod_form.values.memo}></textarea></label></p>
+			<{elseif $imforum_mod_do == 'report'}>
+				<p><{$smarty.const._MD_IMFORUM_REPORT_HELP}></p>
+				<p><textarea name="report_text" rows="5" cols="60" required="required"><{$imforum_mod_form.values.report_text}></textarea></p>
+			<{elseif $imforum_mod_do == 'delete'}>
+				<p class="imforum-notice"><{$smarty.const._MD_IMFORUM_MOD_DELETE_CONFIRM}></p>
+			<{elseif $imforum_mod_do == 'approve'}>
+				<p><{$smarty.const._MD_IMFORUM_MOD_APPROVE_CONFIRM}></p>
+			<{/if}>
+
+			<p><button type="submit"><{$imforum_mod_title}></button> <a href="<{$imforum_back}>"><{$smarty.const._MD_IMFORUM_CANCEL}></a></p>
+		</form>
+	<{/if}>
+</div>

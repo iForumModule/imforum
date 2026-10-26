@@ -19,8 +19,8 @@ include_once __DIR__ . '/include/common.php';
 $modversion = [
 	'name' => _MI_IMFORUM_NAME,
 	'version' => '1.0.0',
-	'status' => 'Alpha',
-	'status_version' => '1.0.0 Alpha',
+	'status' => 'Alpha 5',
+	'status_version' => '1.0.0 Alpha 5',
 	'date' => '25 October 2026',
 	'description' => _MI_IMFORUM_DESC,
 	'author' => 'fiammybe',
@@ -123,6 +123,7 @@ $modversion = [
 		['file' => 'imforum_forum.html', 'description' => 'Forum with its topics'],
 		['file' => 'imforum_topic.html', 'description' => 'Topic with its posts'],
 		['file' => 'imforum_post.html', 'description' => 'Form to write, edit or delete a post'],
+		['file' => 'imforum_moderate.html', 'description' => 'Moderation forms, the queue of waiting posts and the reports'],
 		['file' => 'imforum_viewall.html', 'description' => 'Topics of all forums'],
 		['file' => 'imforum_archive.html', 'description' => 'Archived topics'],
 		['file' => 'imforum_breadcrumb.html', 'description' => 'Path above a page'],

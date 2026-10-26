@@ -154,6 +154,20 @@ class mod_imforum_PermissionService {
 			&& (int) $topic->getVar('topic_last_post_id', 'e') === (int) $post->id();
 	}
 
+	/**
+	 * Lock, move, merge, split, approve and handle reports of the forum
+	 */
+	public function canModerate(mod_imforum_Forum $forum): bool {
+		return $this->isModerator((int) $forum->id());
+	}
+
+	/**
+	 * Members tell the moderators about a post they can read; guests cannot, so nobody can flood the list unseen
+	 */
+	public function canReport(mod_imforum_Forum $forum): bool {
+		return $this->uid > 0 && $this->canReadForum($forum);
+	}
+
 	public function canAttach(mod_imforum_Forum $forum): bool {
 		return $this->has('forum_attach', (int) $forum->id());
 	}
