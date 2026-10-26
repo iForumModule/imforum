@@ -123,6 +123,7 @@ $modversion = [
 		['file' => 'imforum_forum.html', 'description' => 'Forum with its topics'],
 		['file' => 'imforum_topic.html', 'description' => 'Topic with its posts'],
 		['file' => 'imforum_post.html', 'description' => 'Form to write, edit or delete a post'],
+		['file' => 'imforum_moderate.html', 'description' => 'Moderation forms, the queue of waiting posts and the reports'],
 		['file' => 'imforum_viewall.html', 'description' => 'Topics of all forums'],
 		['file' => 'imforum_archive.html', 'description' => 'Archived topics'],
 		['file' => 'imforum_breadcrumb.html', 'description' => 'Path above a page'],

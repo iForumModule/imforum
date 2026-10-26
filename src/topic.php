@@ -62,6 +62,8 @@ if ($order !== null) {
 
 $karma = new mod_imforum_KarmaService($permissions->getUid());
 $canReply = $permissions->canReply($forum, $topic);
+$canReport = $permissions->canReport($forum);
+$firstPostId = $moderator ? (int) $topic->getVar('topic_first_post_id', 'e') : 0;
 $minutes = mod_imforum_Settings::getCount('online_minutes');
 $posters = mod_imforum_PosterInfo::load(array_map(static fn (mod_imforum_Post $post): int => (int) $post->getVar('uid', 'e'), $posts), $minutes);
 
@@ -89,6 +91,9 @@ foreach ($posts as $postId => $post) {
 	$row['quote_url'] = ($canReply && !$row['locked']) ? mod_imforum_View::link('post', ['topic' => $topicId, 'post' => $postId, 'quote' => 1]) : '';
 	$row['edit_url'] = $row['can_edit'] ? mod_imforum_View::link('post', ['do' => 'edit', 'post' => $postId]) : '';
 	$row['delete_url'] = $row['can_delete'] ? mod_imforum_View::link('post', ['do' => 'delete', 'post' => $postId]) : '';
+	$row['report_url'] = $canReport ? mod_imforum_View::link('report', ['post' => $postId]) : '';
+	$row['split_url'] = ($moderator && $postId !== $firstPostId) ? mod_imforum_View::link('moderate', ['do' => 'split', 'post' => $postId]) : '';
+	$row['suspend_url'] = ($moderator && $uid > 0 && $uid !== $permissions->getUid()) ? mod_imforum_View::link('moderate', ['do' => 'suspend', 'post' => $postId]) : '';
 	$rows[] = $row;
 }
 
@@ -150,10 +155,21 @@ $icmsTpl->assign('imforum_topic', [
 	'views' => (int) $topic->getVar('topic_views', 'e'),
 	'replies' => (int) $topic->getVar('topic_replies', 'e'),
 	'locked' => $topic->isLocked(),
+	'sticky' => (int) $topic->getVar('topic_sticky', 'e') === 1,
+	'digest' => (int) $topic->getVar('topic_digest', 'e') === 1,
 	'forum_url' => mod_imforum_View::link('forum', ['forum' => $forumId]),
 	'forum_name' => $forum->getVar('forum_name'),
 ]);
 $icmsTpl->assign('imforum_posts', $rows);
+$topicLink = static fn (string $do): string => mod_imforum_View::link('moderate', ['do' => $do, 'topic' => $topicId]);
+$icmsTpl->assign('imforum_mod_tools', $moderator ? [
+	['url' => $topicLink($topic->isLocked() ? 'unlock' : 'lock'), 'label' => $topic->isLocked() ? _MD_IMFORUM_MOD_UNLOCK : _MD_IMFORUM_MOD_LOCK],
+	['url' => $topicLink((int) $topic->getVar('topic_sticky', 'e') === 1 ? 'unsticky' : 'sticky'), 'label' => (int) $topic->getVar('topic_sticky', 'e') === 1 ? _MD_IMFORUM_MOD_UNSTICKY : _MD_IMFORUM_MOD_STICKY],
+	['url' => $topicLink((int) $topic->getVar('topic_digest', 'e') === 1 ? 'undigest' : 'digest'), 'label' => (int) $topic->getVar('topic_digest', 'e') === 1 ? _MD_IMFORUM_MOD_UNDIGEST : _MD_IMFORUM_MOD_DIGEST],
+	['url' => $topicLink('move'), 'label' => _MD_IMFORUM_MOD_MOVE],
+	['url' => $topicLink('merge'), 'label' => _MD_IMFORUM_MOD_MERGE],
+	['url' => $topicLink('delete'), 'label' => _MD_IMFORUM_MOD_DELETE],
+] : []);
 $icmsTpl->assign('imforum_reply_url', $canReply ? mod_imforum_View::link('post', ['topic' => $topicId]) : '');
 // the quick reply is a short form on the page; with a captcha the full form is needed
 $quick = $canReply && (int) mod_imforum_Settings::get('quickreply_enabled') === 1

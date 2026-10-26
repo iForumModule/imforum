@@ -8,6 +8,11 @@
 		<{else}><strong><{$smarty.const._MD_IMFORUM_VIEW_FLAT}></strong> | <a href="<{$imforum_tree_url}>"><{$smarty.const._MD_IMFORUM_VIEW_TREE}></a><{/if}>
 	</p>
 
+	<{if $imforum_mod_tools}>
+	<p class="imforum-modtools"><strong><{$smarty.const._MD_IMFORUM_MODERATION}>:</strong>
+		<{foreach from=$imforum_mod_tools item=tool}><a href="<{$tool.url}>"><{$tool.label}></a> <{/foreach}>
+	</p>
+	<{/if}>
 	<{if $imforum_reply_url}><p class="imforum-actions"><a class="imforum-button" href="<{$imforum_reply_url}>"><{$smarty.const._MD_IMFORUM_REPLY}></a></p><{/if}>
 	<{$imforum_pager}>
 	<{foreach from=$imforum_posts item=post}>
@@ -53,12 +58,15 @@
 					<{foreach from=$post.edits item=edit name=edits}><{$edit.name}> (<{$edit.time}>)<{if !$smarty.foreach.edits.last}>, <{/if}><{/foreach}>
 				</div>
 			<{/if}>
-			<{if $post.reply_url || $post.edit_url || $post.delete_url}>
+			<{if $post.reply_url || $post.edit_url || $post.delete_url || $post.report_url || $post.split_url || $post.suspend_url}>
 				<div class="imforum-post-actions">
 					<{if $post.reply_url}><a href="<{$post.reply_url}>"><{$smarty.const._MD_IMFORUM_REPLY}></a><{/if}>
 					<{if $post.quote_url}><a href="<{$post.quote_url}>"><{$smarty.const._MD_IMFORUM_QUOTE}></a><{/if}>
 					<{if $post.edit_url}><a href="<{$post.edit_url}>"><{$smarty.const._MD_IMFORUM_EDIT}></a><{/if}>
 					<{if $post.delete_url}><a href="<{$post.delete_url}>"><{$smarty.const._MD_IMFORUM_DELETE}></a><{/if}>
+					<{if $post.report_url}><a href="<{$post.report_url}>"><{$smarty.const._MD_IMFORUM_REPORT}></a><{/if}>
+					<{if $post.split_url}><a href="<{$post.split_url}>"><{$smarty.const._MD_IMFORUM_MOD_SPLIT}></a><{/if}>
+					<{if $post.suspend_url}><a href="<{$post.suspend_url}>"><{$smarty.const._MD_IMFORUM_MOD_SUSPEND}></a><{/if}>
 				</div>
 			<{/if}>
 		</div>

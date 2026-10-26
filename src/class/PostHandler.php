@@ -70,6 +70,15 @@ class mod_imforum_PostHandler extends icms_ipf_Handler {
 		return $this->getObjects($criteria, true);
 	}
 
+	/**
+	 * Posts of a forum that wait for a moderator
+	 */
+	public function countPending(int $forumId): int {
+		$criteria = new icms_db_criteria_Compo(new icms_db_criteria_Item('forum_id', $forumId));
+		$criteria->add(new icms_db_criteria_Item('approved', 0));
+		return (int) $this->getCount($criteria);
+	}
+
 	public function countApproved(int $topicId): int {
 		return (int) $this->getCount($this->approvedIn($topicId));
 	}
