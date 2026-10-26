@@ -13,8 +13,8 @@ use RuntimeException;
  */
 final class Database
 {
-	/** Core tables the IPF handlers touch: the module row and group permissions */
-	private const CORE_TABLES = ['modules', 'group_permission'];
+	/** Core tables the IPF handlers touch: the module row and group permissions; the importer reads the preferences and subscriptions too */
+	private const CORE_TABLES = ['modules', 'group_permission', 'config', 'xoopsnotifications'];
 
 	public static function install(): void
 	{
@@ -58,7 +58,14 @@ final class Database
 		foreach (self::tables('imforum_') as $table) {
 			self::exec("TRUNCATE TABLE `$table`");
 		}
-		self::exec('TRUNCATE TABLE `' . icms::$xoopsDB->prefix('group_permission') . '`');
+		foreach (['group_permission', 'config', 'xoopsnotifications'] as $table) {
+			self::exec('TRUNCATE TABLE `' . icms::$xoopsDB->prefix($table) . '`');
+		}
+		// the importer tests leave tables of an old iForum behind
+		foreach (self::tables('bb_') as $table) {
+			self::exec("DROP TABLE `$table`");
+		}
+		self::exec('DELETE FROM `' . icms::$xoopsDB->prefix('modules') . "` WHERE dirname <> 'imforum'");
 	}
 
 	/**

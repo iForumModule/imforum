@@ -14,6 +14,7 @@ define('_MI_IMFORUM_MENU_SUSPENSIONS', 'Suspensions');
 define('_MI_IMFORUM_MENU_DIGESTS', 'Digests');
 define('_MI_IMFORUM_MENU_ARCHIVE', 'Archive');
 define('_MI_IMFORUM_MENU_PRUNE', 'Prune and recount');
+define('_MI_IMFORUM_MENU_IMPORT', 'Import from iForum');
 define('_MI_IMFORUM_BLOCK_RECENT', 'Latest topics');
 define('_MI_IMFORUM_BLOCK_RECENT_DSC', 'The topics with the newest posts');
 define('_MI_IMFORUM_BLOCK_HOT', 'Busiest topics');

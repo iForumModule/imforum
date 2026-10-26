@@ -18,6 +18,7 @@ define('ICMS_GROUP_ANONYMOUS', 3);
 
 // set by the core's include/common.php at runtime
 define('_GLOBAL_LEFT', 'left');
+define('XOOPS_CACHE_PATH', '/tmp/cache');
 // from the core's language/<language>/global.php
 define('_NOPERM', 'Sorry, you don\'t have the permission to access this area.');
 // the _CO_ICMS_* strings of the IPF forms and tables
