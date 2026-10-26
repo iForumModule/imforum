@@ -24,24 +24,22 @@ class mod_imforum_TopicHandler extends icms_ipf_Handler {
 	 * Only approved posts count; the first post is not a reply.
 	 */
 	public function synchronise(int $topicId): bool {
-		$posts = $this->db->prefix(IMFORUM_DIRNAME . '_post');
-		$result = $this->db->queryF("SELECT COUNT(*), MIN(post_id), MAX(post_id) FROM $posts WHERE topic_id = $topicId AND approved = 1");
-		$row = $result ? $this->db->fetchRow($result) : false;
-		[$count, $first, $last] = $row ? array_values($row) : [0, 0, 0];
+		$posts = mod_imforum_Db::table('post');
+		$row = mod_imforum_Db::row("SELECT COUNT(*), MIN(post_id), MAX(post_id) FROM $posts WHERE topic_id = ? AND approved = 1", [$topicId]);
+		[$count, $first, $last] = $row ?: [0, 0, 0];
 
-		// queryF: the counters follow a write that has already been allowed
-		return (bool) $this->db->queryF(sprintf(
-			'UPDATE %s SET topic_replies = %d, topic_first_post_id = %d, topic_last_post_id = %d WHERE topic_id = %d',
-			$this->table, max((int) $count - 1, 0), (int) $first, (int) $last, $topicId
-		));
+		return mod_imforum_Db::ok(
+			"UPDATE {$this->table} SET topic_replies = ?, topic_first_post_id = ?, topic_last_post_id = ? WHERE topic_id = ?",
+			[max((int) $count - 1, 0), (int) $first, (int) $last, $topicId]
+		);
 	}
 
 	/**
 	 * Recount every topic in one query; used after an import or a prune
 	 */
 	public function synchroniseAll(): bool {
-		$posts = $this->db->prefix(IMFORUM_DIRNAME . '_post');
-		return (bool) $this->db->queryF("UPDATE {$this->table} t"
+		$posts = mod_imforum_Db::table('post');
+		return mod_imforum_Db::ok("UPDATE {$this->table} t"
 			. " LEFT JOIN (SELECT topic_id, COUNT(*) AS n, MIN(post_id) AS first, MAX(post_id) AS last FROM $posts WHERE approved = 1 GROUP BY topic_id) p ON p.topic_id = t.topic_id"
 			. ' SET t.topic_replies = GREATEST(COALESCE(p.n, 0) - 1, 0), t.topic_first_post_id = COALESCE(p.first, 0), t.topic_last_post_id = COALESCE(p.last, 0)');
 	}
@@ -57,20 +55,15 @@ class mod_imforum_TopicHandler extends icms_ipf_Handler {
 		if (!$forumIds) {
 			return [];
 		}
-		$posts = $this->db->prefix(IMFORUM_DIRNAME . '_post');
+		$posts = mod_imforum_Db::table('post');
 		$sql = "SELECT t.topic_id FROM {$this->table} t"
 			. " LEFT JOIN $posts p ON p.post_id = t.topic_last_post_id"
-			. ' WHERE t.forum_id IN (' . implode(',', $forumIds) . ')'
-			. ' AND COALESCE(p.post_time, t.topic_time) < ' . $before
+			. ' WHERE t.forum_id IN (' . mod_imforum_Db::marks($forumIds) . ')'
+			. ' AND COALESCE(p.post_time, t.topic_time) < ?'
 			. ($keepSticky ? ' AND t.topic_sticky = 0' : '')
 			. ($keepDigest ? ' AND t.topic_digest = 0' : '');
 
-		$ids = [];
-		$result = $this->db->queryF($sql);
-		while ($result && ($row = $this->db->fetchRow($result))) {
-			$ids[] = (int) $row[0];
-		}
-		return $ids;
+		return array_map(static fn (array $row): int => (int) $row[0], mod_imforum_Db::rows($sql, [...$forumIds, $before]));
 	}
 
 	/**
@@ -87,8 +80,7 @@ class mod_imforum_TopicHandler extends icms_ipf_Handler {
 			return true;
 		}
 
-		$posts = $this->db->prefix(IMFORUM_DIRNAME . '_post');
-		$ok = (bool) $this->db->queryF("UPDATE $posts SET forum_id = $forumId WHERE topic_id = $topicId");
+		$ok = mod_imforum_Db::ok('UPDATE ' . mod_imforum_Db::table('post') . ' SET forum_id = ? WHERE topic_id = ?', [$forumId, $topicId]);
 		$topic->setVar('forum_id', $forumId);
 		$ok = $this->insert($topic, true) && $ok;
 		return $forumHandler->synchronise($oldForumId) && $ok;
@@ -152,7 +144,8 @@ class mod_imforum_TopicHandler extends icms_ipf_Handler {
 			return ['ids' => [], 'total' => 0];
 		}
 		$joins = '';
-		$where = ' WHERE t.approved = 1 AND t.forum_id IN (' . implode(',', $forumIds) . ')';
+		$joinParams = [];
+		$where = ' WHERE t.approved = 1 AND t.forum_id IN (' . mod_imforum_Db::marks($forumIds) . ')';
 		if ($filter === 'digest') {
 			$where .= ' AND t.topic_digest = 1';
 		} elseif ($filter === 'unread') {
@@ -161,20 +154,17 @@ class mod_imforum_TopicHandler extends icms_ipf_Handler {
 			}
 			$unread = icms_getModuleHandler('readmark', IMFORUM_DIRNAME)->getUnreadSql($uid);
 			$joins = $unread['joins'];
+			$joinParams = $unread['params'];
 			$where .= $unread['where'];
 		}
 
-		$total = 0;
-		$result = $this->db->queryF("SELECT COUNT(*) FROM {$this->table} t$joins$where");
-		if ($result && ($row = $this->db->fetchRow($result))) {
-			$total = (int) $row[0];
-		}
-
-		$ids = [];
-		$result = $this->db->queryF("SELECT t.topic_id FROM {$this->table} t$joins$where ORDER BY t.topic_last_post_id DESC LIMIT " . max(0, $start) . ', ' . max(1, $limit));
-		while ($result && ($row = $this->db->fetchRow($result))) {
-			$ids[] = (int) $row[0];
-		}
+		// the placeholders of the joins come first in the statement
+		$params = [...$joinParams, ...$forumIds];
+		$total = mod_imforum_Db::value("SELECT COUNT(*) FROM {$this->table} t$joins$where", $params);
+		$ids = array_map(
+			static fn (array $row): int => (int) $row[0],
+			mod_imforum_Db::rows("SELECT t.topic_id FROM {$this->table} t$joins$where ORDER BY t.topic_last_post_id DESC LIMIT ?, ?", [...$params, max(0, $start), max(1, $limit)])
+		);
 		return ['ids' => $ids, 'total' => $total];
 	}
 
@@ -189,24 +179,20 @@ class mod_imforum_TopicHandler extends icms_ipf_Handler {
 		if (!$forumIds) {
 			return [];
 		}
-		$posts = $this->db->prefix(IMFORUM_DIRNAME . '_post');
-		$ids = [];
-		$result = $this->db->queryF(
+		$posts = mod_imforum_Db::table('post');
+		return array_map(static fn (array $row): int => (int) $row[0], mod_imforum_Db::rows(
 			"SELECT t.topic_id FROM {$this->table} t JOIN $posts p ON p.post_id = t.topic_last_post_id"
-			. ' WHERE t.approved = 1 AND t.topic_replies > 0 AND t.forum_id IN (' . implode(',', $forumIds) . ') AND p.post_time >= ' . max(0, $since)
-			. ' ORDER BY t.topic_replies DESC, t.topic_last_post_id DESC LIMIT ' . max(1, $limit)
-		);
-		while ($result && ($row = $this->db->fetchRow($result))) {
-			$ids[] = (int) $row[0];
-		}
-		return $ids;
+			. ' WHERE t.approved = 1 AND t.topic_replies > 0 AND t.forum_id IN (' . mod_imforum_Db::marks($forumIds) . ') AND p.post_time >= ?'
+			. ' ORDER BY t.topic_replies DESC, t.topic_last_post_id DESC LIMIT ?',
+			[...$forumIds, max(0, $since), max(1, $limit)]
+		));
 	}
 
 	/**
 	 * Count a view
 	 */
 	public function incrementViews(int $topicId): bool {
-		return (bool) $this->db->queryF("UPDATE {$this->table} SET topic_views = topic_views + 1 WHERE topic_id = $topicId");
+		return mod_imforum_Db::ok("UPDATE {$this->table} SET topic_views = topic_views + 1 WHERE topic_id = ?", [$topicId]);
 	}
 
 	protected function beforeInsert(mod_imforum_Topic $topic): bool {

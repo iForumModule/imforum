@@ -41,7 +41,7 @@ class mod_imforum_AttachmentHandler extends icms_ipf_Handler {
 	}
 
 	public function incrementDownloads(int $attachId): bool {
-		return (bool) $this->db->queryF("UPDATE {$this->table} SET downloads = downloads + 1 WHERE attach_id = $attachId");
+		return mod_imforum_Db::ok("UPDATE {$this->table} SET downloads = downloads + 1 WHERE attach_id = ?", [$attachId]);
 	}
 
 	public function countForPost(int $postId): int {

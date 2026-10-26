@@ -40,7 +40,7 @@ class mod_imforum_PermtemplateHandler extends icms_ipf_Handler {
 	 * @param array<string, list<int>> $template
 	 */
 	public function saveTemplate(array $template): bool {
-		$ok = (bool) $this->db->queryF("DELETE FROM {$this->table}");
+		$ok = mod_imforum_Db::ok("DELETE FROM {$this->table}");
 		foreach (array_intersect_key($template, array_flip(mod_imforum_ForumHandler::PERMISSIONS)) as $name => $groups) {
 			foreach (array_unique(array_map('intval', $groups)) as $groupId) {
 				$row = $this->create();

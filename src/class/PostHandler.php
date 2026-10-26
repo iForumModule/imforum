@@ -25,18 +25,14 @@ class mod_imforum_PostHandler extends icms_ipf_Handler {
 	 * recount per post: the topic handler recounts the forum once afterwards.
 	 */
 	public function deleteByTopic(int $topicId): bool {
-		$postIds = [];
-		$result = $this->db->queryF("SELECT post_id FROM {$this->table} WHERE topic_id = $topicId");
-		while ($result && ($row = $this->db->fetchRow($result))) {
-			$postIds[] = (int) $row[0];
-		}
+		$postIds = array_map(static fn (array $row): int => (int) $row[0], mod_imforum_Db::rows("SELECT post_id FROM {$this->table} WHERE topic_id = ?", [$topicId]));
 		if (!$postIds) {
 			return true;
 		}
 		foreach (array_chunk($postIds, 500) as $chunk) {
 			$this->deletePostChildren($chunk);
 		}
-		return (bool) $this->db->queryF("DELETE FROM {$this->table} WHERE topic_id = $topicId");
+		return mod_imforum_Db::ok("DELETE FROM {$this->table} WHERE topic_id = ?", [$topicId]);
 	}
 
 	/**
@@ -54,6 +50,26 @@ class mod_imforum_PostHandler extends icms_ipf_Handler {
 		$criteria = new icms_db_criteria_Compo(new icms_db_criteria_Item('topic_id', $topicId));
 		$criteria->add(new icms_db_criteria_Item('approved', 1));
 		return $criteria;
+	}
+
+	/**
+	 * Approved posts written in a period, counted per topic, for the digest
+	 *
+	 * @return list<array{0: int, 1: int, 2: int, 3: int}> forum id, topic id, number of posts, id of the first new post; by forum, busiest topic first
+	 */
+	public function getActivity(int $since, int $until): array {
+		$topics = mod_imforum_Db::table('topic');
+		$rows = [];
+		foreach (mod_imforum_Db::rows(
+			'SELECT p.forum_id, p.topic_id, COUNT(*) AS n, MIN(p.post_id) AS first_new, MAX(p.post_id) AS last_new'
+			. " FROM {$this->table} p JOIN $topics t ON t.topic_id = p.topic_id"
+			. ' WHERE p.approved = 1 AND t.approved = 1 AND p.post_time >= ? AND p.post_time < ?'
+			. ' GROUP BY p.forum_id, p.topic_id ORDER BY p.forum_id, last_new DESC',
+			[$since, $until]
+		) as $row) {
+			$rows[] = [(int) $row[0], (int) $row[1], (int) $row[2], (int) $row[3]];
+		}
+		return $rows;
 	}
 
 	/**
@@ -93,8 +109,7 @@ class mod_imforum_PostHandler extends icms_ipf_Handler {
 	 */
 	public function getThreadOrder(int $topicId): array {
 		$parentOf = [];
-		$result = $this->db->queryF("SELECT post_id, pid FROM {$this->table} WHERE topic_id = $topicId AND approved = 1 ORDER BY post_id");
-		while ($result && ($row = $this->db->fetchRow($result))) {
+		foreach (mod_imforum_Db::rows("SELECT post_id, pid FROM {$this->table} WHERE topic_id = ? AND approved = 1 ORDER BY post_id", [$topicId]) as $row) {
 			$parentOf[(int) $row[0]] = (int) $row[1];
 		}
 
@@ -160,8 +175,7 @@ class mod_imforum_PostHandler extends icms_ipf_Handler {
 			return [];
 		}
 		$counts = [];
-		$result = $this->db->queryF('SELECT uid, COUNT(*) FROM ' . $this->table . ' WHERE approved = 1 AND uid IN (' . implode(',', $uids) . ') GROUP BY uid');
-		while ($result && ($row = $this->db->fetchRow($result))) {
+		foreach (mod_imforum_Db::rows('SELECT uid, COUNT(*) FROM ' . $this->table . ' WHERE approved = 1 AND uid IN (' . mod_imforum_Db::marks($uids) . ') GROUP BY uid', $uids) as $row) {
 			$counts[(int) $row[0]] = (int) $row[1];
 		}
 		return $counts;
@@ -179,8 +193,10 @@ class mod_imforum_PostHandler extends icms_ipf_Handler {
 			return [];
 		}
 		$top = [];
-		$result = $this->db->queryF('SELECT uid, COUNT(*) AS n FROM ' . $this->table . ' WHERE approved = 1 AND uid > 0 AND forum_id IN (' . implode(',', $forumIds) . ') GROUP BY uid ORDER BY n DESC, uid ASC LIMIT ' . max(1, $limit));
-		while ($result && ($row = $this->db->fetchRow($result))) {
+		foreach (mod_imforum_Db::rows(
+			'SELECT uid, COUNT(*) AS n FROM ' . $this->table . ' WHERE approved = 1 AND uid > 0 AND forum_id IN (' . mod_imforum_Db::marks($forumIds) . ') GROUP BY uid ORDER BY n DESC, uid ASC LIMIT ?',
+			[...$forumIds, max(1, $limit)]
+		) as $row) {
 			$top[] = ['uid' => (int) $row[0], 'posts' => (int) $row[1]];
 		}
 		return $top;
@@ -202,8 +218,7 @@ class mod_imforum_PostHandler extends icms_ipf_Handler {
 		$postIds = array_values(array_filter(array_map('intval', $postIds)));
 		$summaries = [];
 		foreach (array_chunk($postIds, 500) as $chunk) {
-			$result = $this->db->queryF('SELECT post_id, topic_id, uid, poster_name, post_time, subject FROM ' . $this->table . ' WHERE post_id IN (' . implode(',', $chunk) . ')');
-			while ($result && ($row = $this->db->fetchRow($result))) {
+			foreach (mod_imforum_Db::rows('SELECT post_id, topic_id, uid, poster_name, post_time, subject FROM ' . $this->table . ' WHERE post_id IN (' . mod_imforum_Db::marks($chunk) . ')', $chunk) as $row) {
 				$summaries[(int) $row[0]] = [
 					'post_id' => (int) $row[0], 'topic_id' => (int) $row[1], 'uid' => (int) $row[2],
 					'poster_name' => (string) $row[3], 'post_time' => (int) $row[4], 'subject' => (string) $row[5],
@@ -271,10 +286,7 @@ class mod_imforum_PostHandler extends icms_ipf_Handler {
 	protected function afterDelete(mod_imforum_Post $post): bool {
 		$postId = (int) $post->id();
 		$this->deletePostChildren([$postId]);
-		$this->db->queryF(sprintf(
-			'UPDATE %s SET pid = %d WHERE pid = %d',
-			$this->table, (int) $post->getVar('pid', 'e'), $postId
-		));
+		mod_imforum_Db::execute("UPDATE {$this->table} SET pid = ? WHERE pid = ?", [(int) $post->getVar('pid', 'e'), $postId]);
 
 		$topicId = (int) $post->getVar('topic_id', 'e');
 		if ($this->getCount(new icms_db_criteria_Item('topic_id', $topicId)) === 0) {

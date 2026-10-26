@@ -35,10 +35,6 @@ parameters:
             message: '#^Parameter \#1 \$key of method icms_ipf_Tree::getFirstChild\(\) expects string, int given\.$#'
             identifier: argument.type
         -
-            # icms_db_legacy_IDatabase::queryF() documents a resource, but returns false when the query fails
-            identifier: ternary.alwaysTrue
-            path: src/include/onupdate.php
-        -
             # icms_core_DataFilter::filterTextareaDisplay() documents bool switches but compares them
             # with != 0 and !== 0, so false would still convert line breaks: the post's 0/1 flags go in as they are
             message: '#^Parameter \#[2-5] \$(smiley|icode|image|br) of static method icms_core_DataFilter::filterTextareaDisplay\(\) expects bool, int given\.$#'

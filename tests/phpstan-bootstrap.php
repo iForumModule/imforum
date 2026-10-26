@@ -11,6 +11,7 @@ define('ICMS_ROOT_PATH', $core);
 define('ICMS_URL', 'http://localhost');
 define('ICMS_UPLOAD_PATH', $core . '/uploads');
 define('ICMS_UPLOAD_URL', 'http://localhost/uploads');
+define('XOOPS_DB_PREFIX', 'icms');
 define('ICMS_GROUP_ADMIN', 1);
 define('ICMS_GROUP_USERS', 2);
 define('ICMS_GROUP_ANONYMOUS', 3);

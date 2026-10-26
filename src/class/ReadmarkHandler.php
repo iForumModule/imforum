@@ -64,28 +64,63 @@ class mod_imforum_ReadmarkHandler extends icms_ipf_Handler {
 	 * Forget all read marks for a forum or topic that is deleted
 	 */
 	public function deleteByItem(int $type, int $itemId): bool {
-		return (bool) $this->db->queryF(sprintf(
-			'DELETE FROM %s WHERE read_type = %d AND item_id = %d',
-			$this->table, $type, $itemId
-		));
+		return mod_imforum_Db::ok("DELETE FROM {$this->table} WHERE read_type = ? AND item_id = ?", [$type, $itemId]);
 	}
 
 	/**
 	 * Drop read marks older than a moment; used by the cleanup task (phase 6)
+	 *
+	 * A topic without a mark counts as unread, so deleting marks by age alone
+	 * would turn every old topic into an unread one. Posts older than the
+	 * moment are therefore counted as read first: a member who has marks in a
+	 * forum gets a forum mark up to the newest post from before the moment.
+	 * Then the old marks go, together with the marks of topics that no longer
+	 * exist and the topic marks the forum mark already covers.
+	 *
+	 * @return int the number of topic marks removed
 	 */
-	public function purgeOlderThan(int $time): bool {
-		return (bool) $this->db->queryF(sprintf('DELETE FROM %s WHERE read_time < %d', $this->table, $time));
+	public function purgeOlderThan(int $time): int {
+		$posts = mod_imforum_Db::table('post');
+		$topics = mod_imforum_Db::table('topic');
+		$topicType = self::TYPE_TOPIC;
+		$forumType = self::TYPE_FORUM;
+
+		$newestOld = [];
+		foreach (mod_imforum_Db::rows("SELECT forum_id, MAX(post_id) FROM $posts WHERE approved = 1 AND post_time < ? GROUP BY forum_id", [$time]) as $row) {
+			$newestOld[(int) $row[0]] = (int) $row[1];
+		}
+
+		$pairs = [];
+		foreach (mod_imforum_Db::rows("SELECT DISTINCT m.uid, t.forum_id FROM {$this->table} m JOIN $topics t ON t.topic_id = m.item_id WHERE m.read_type = ? AND m.read_time < ?", [$topicType, $time]) as $row) {
+			$pairs[] = [(int) $row[0], (int) $row[1]];
+		}
+		foreach ($pairs as [$uid, $forumId]) {
+			$upTo = $newestOld[$forumId] ?? 0;
+			$seen = $this->getLastRead($forumType, $uid, [$forumId])[$forumId] ?? 0;
+			if ($upTo > $seen) {
+				$this->markRead($forumType, $uid, $forumId, $upTo);
+			}
+		}
+
+		$removed = 0;
+		foreach ([
+			["DELETE FROM {$this->table} WHERE read_type = ? AND read_time < ?", [$topicType, $time]],
+			["DELETE m FROM {$this->table} m LEFT JOIN $topics t ON t.topic_id = m.item_id WHERE m.read_type = ? AND t.topic_id IS NULL", [$topicType]],
+			["DELETE m FROM {$this->table} m JOIN $topics t ON t.topic_id = m.item_id JOIN {$this->table} f ON f.read_type = ? AND f.uid = m.uid AND f.item_id = t.forum_id WHERE m.read_type = ? AND m.post_id <= f.post_id", [$forumType, $topicType]],
+		] as [$sql, $params]) {
+			$removed += mod_imforum_Db::execute($sql, $params) ?? 0;
+		}
+		return $removed;
 	}
 
 	/**
 	 * Drop a member's marks on the topics of a forum, once the forum itself is marked
 	 */
 	public function deleteTopicMarksInForum(int $uid, int $forumId): bool {
-		$topics = $this->db->prefix(IMFORUM_DIRNAME . '_topic');
-		return (bool) $this->db->queryF(sprintf(
-			'DELETE FROM %s WHERE read_type = %d AND uid = %d AND item_id IN (SELECT topic_id FROM %s WHERE forum_id = %d)',
-			$this->table, self::TYPE_TOPIC, $uid, $topics, $forumId
-		));
+		return mod_imforum_Db::ok(
+			"DELETE FROM {$this->table} WHERE read_type = ? AND uid = ? AND item_id IN (SELECT topic_id FROM " . mod_imforum_Db::table('topic') . ' WHERE forum_id = ?)',
+			[self::TYPE_TOPIC, $uid, $forumId]
+		);
 	}
 
 	/**
@@ -95,14 +130,15 @@ class mod_imforum_ReadmarkHandler extends icms_ipf_Handler {
 	 * mark on the topic and the mark on its forum ("mark all as read"). The
 	 * topic table must be aliased t.
 	 *
-	 * @return array{joins: string, where: string}
+	 * @return array{joins: string, where: string, params: list<int>} the values for the placeholders of the joins, in order
 	 */
 	public function getUnreadSql(int $uid): array {
 		$read = $this->table;
 		return [
-			'joins' => " LEFT JOIN $read rt ON rt.read_type = " . self::TYPE_TOPIC . " AND rt.uid = $uid AND rt.item_id = t.topic_id"
-				. " LEFT JOIN $read rf ON rf.read_type = " . self::TYPE_FORUM . " AND rf.uid = $uid AND rf.item_id = t.forum_id",
+			'joins' => " LEFT JOIN $read rt ON rt.read_type = ? AND rt.uid = ? AND rt.item_id = t.topic_id"
+				. " LEFT JOIN $read rf ON rf.read_type = ? AND rf.uid = ? AND rf.item_id = t.forum_id",
 			'where' => ' AND t.topic_last_post_id > GREATEST(COALESCE(rt.post_id, 0), COALESCE(rf.post_id, 0))',
+			'params' => [self::TYPE_TOPIC, $uid, self::TYPE_FORUM, $uid],
 		];
 	}
 
@@ -118,11 +154,10 @@ class mod_imforum_ReadmarkHandler extends icms_ipf_Handler {
 			return [];
 		}
 		$unread = $this->getUnreadSql($uid);
-		$sql = 'SELECT t.forum_id, COUNT(*) FROM ' . $this->db->prefix(IMFORUM_DIRNAME . '_topic') . ' t' . $unread['joins']
-			. ' WHERE t.approved = 1 AND t.forum_id IN (' . implode(',', $forumIds) . ')' . $unread['where'] . ' GROUP BY t.forum_id';
+		$sql = 'SELECT t.forum_id, COUNT(*) FROM ' . mod_imforum_Db::table('topic') . ' t' . $unread['joins']
+			. ' WHERE t.approved = 1 AND t.forum_id IN (' . mod_imforum_Db::marks($forumIds) . ')' . $unread['where'] . ' GROUP BY t.forum_id';
 		$counts = [];
-		$result = $this->db->queryF($sql);
-		while ($result && ($row = $this->db->fetchRow($result))) {
+		foreach (mod_imforum_Db::rows($sql, [...$unread['params'], ...$forumIds]) as $row) {
 			$counts[(int) $row[0]] = (int) $row[1];
 		}
 		return $counts;

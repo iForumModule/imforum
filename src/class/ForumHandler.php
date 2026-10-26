@@ -91,41 +91,28 @@ class mod_imforum_ForumHandler extends icms_ipf_Handler {
 	 * requests, and stays cheap thanks to the indexes from imforum_db_upgrade_1().
 	 */
 	public function synchronise(int $forumId): bool {
-		$topics = $this->db->prefix(IMFORUM_DIRNAME . '_topic');
-		$posts = $this->db->prefix(IMFORUM_DIRNAME . '_post');
+		$topicCount = mod_imforum_Db::value('SELECT COUNT(*) FROM ' . mod_imforum_Db::table('topic') . ' WHERE forum_id = ? AND approved = 1', [$forumId]);
+		[$postCount, $lastPost] = mod_imforum_Db::row('SELECT COUNT(*), MAX(post_id) FROM ' . mod_imforum_Db::table('post') . ' WHERE forum_id = ? AND approved = 1', [$forumId]) ?: [0, 0];
 
-		[$topicCount] = $this->fetchRow("SELECT COUNT(*) FROM $topics WHERE forum_id = $forumId AND approved = 1");
-		[$postCount, $lastPost] = $this->fetchRow("SELECT COUNT(*), MAX(post_id) FROM $posts WHERE forum_id = $forumId AND approved = 1");
-
-		// queryF: the counters follow a write that has already been allowed
-		return (bool) $this->db->queryF(sprintf(
-			'UPDATE %s SET forum_topics = %d, forum_posts = %d, forum_last_post_id = %d WHERE forum_id = %d',
-			$this->table, (int) $topicCount, (int) $postCount, (int) $lastPost, $forumId
-		));
+		return mod_imforum_Db::ok(
+			"UPDATE {$this->table} SET forum_topics = ?, forum_posts = ?, forum_last_post_id = ? WHERE forum_id = ?",
+			[$topicCount, (int) $postCount, (int) $lastPost, $forumId]
+		);
 	}
 
 	/**
 	 * Recount every forum in two queries; used after an import or a prune
 	 */
 	public function synchroniseAll(): bool {
-		$topics = $this->db->prefix(IMFORUM_DIRNAME . '_topic');
-		$posts = $this->db->prefix(IMFORUM_DIRNAME . '_post');
+		$topics = mod_imforum_Db::table('topic');
+		$posts = mod_imforum_Db::table('post');
 
-		$ok = (bool) $this->db->queryF("UPDATE {$this->table} f"
+		$ok = mod_imforum_Db::ok("UPDATE {$this->table} f"
 			. " LEFT JOIN (SELECT forum_id, COUNT(*) AS n FROM $topics WHERE approved = 1 GROUP BY forum_id) t ON t.forum_id = f.forum_id"
 			. ' SET f.forum_topics = COALESCE(t.n, 0)');
-		return (bool) $this->db->queryF("UPDATE {$this->table} f"
+		return mod_imforum_Db::ok("UPDATE {$this->table} f"
 			. " LEFT JOIN (SELECT forum_id, COUNT(*) AS n, MAX(post_id) AS last FROM $posts WHERE approved = 1 GROUP BY forum_id) p ON p.forum_id = f.forum_id"
 			. ' SET f.forum_posts = COALESCE(p.n, 0), f.forum_last_post_id = COALESCE(p.last, 0)') && $ok;
-	}
-
-	/**
-	 * @return list<int|string|null>
-	 */
-	private function fetchRow(string $sql): array {
-		$result = $this->db->queryF($sql);
-		$row = $result ? $this->db->fetchRow($result) : false;
-		return $row ? array_values($row) : [0, 0];
 	}
 
 	/**
@@ -159,8 +146,7 @@ class mod_imforum_ForumHandler extends icms_ipf_Handler {
 	}
 
 	private function getParentId(int $forumId): int {
-		[$parent] = $this->fetchRow("SELECT parent_forum FROM {$this->table} WHERE forum_id = $forumId");
-		return (int) $parent;
+		return mod_imforum_Db::value("SELECT parent_forum FROM {$this->table} WHERE forum_id = ?", [$forumId]);
 	}
 
 	/**
@@ -181,9 +167,6 @@ class mod_imforum_ForumHandler extends icms_ipf_Handler {
 		icms_getModuleHandler('online', IMFORUM_DIRNAME)->deleteAll($byForum);
 		icms_getModuleHandler('readmark', IMFORUM_DIRNAME)->deleteByItem(mod_imforum_ReadmarkHandler::TYPE_FORUM, $forumId);
 
-		return (bool) $this->db->queryF(sprintf(
-			'UPDATE %s SET parent_forum = %d WHERE parent_forum = %d',
-			$this->table, (int) $forum->getVar('parent_forum', 'e'), $forumId
-		));
+		return mod_imforum_Db::ok("UPDATE {$this->table} SET parent_forum = ? WHERE parent_forum = ?", [(int) $forum->getVar('parent_forum', 'e'), $forumId]);
 	}
 }

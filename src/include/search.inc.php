@@ -30,30 +30,32 @@ function imforum_search($queryarray, $andor, $limit, $offset, $userid) {
 	if (!$forumIds) {
 		return [];
 	}
-	$db = icms::$xoopsDB;
-	$posts = $db->prefix(IMFORUM_DIRNAME . '_post');
+	$posts = mod_imforum_Db::table('post');
 
-	$where = 'p.approved = 1 AND p.forum_id IN (' . implode(',', array_map('intval', $forumIds)) . ')';
+	$forumIds = array_map('intval', $forumIds);
+	$params = $forumIds;
+	$where = 'p.approved = 1 AND p.forum_id IN (' . mod_imforum_Db::marks($forumIds) . ')';
 	if ((int) $userid > 0) {
-		$where .= ' AND p.uid = ' . (int) $userid;
+		$where .= ' AND p.uid = ?';
+		$params[] = (int) $userid;
 	}
 	if (is_array($queryarray) && $queryarray) {
 		$conditions = [];
 		foreach ($queryarray as $word) {
 			// % and _ in a word are plain characters
-			$like = $db->quoteString('%' . addcslashes((string) $word, '\\%_') . '%');
-			$conditions[] = "(p.subject LIKE $like OR (p.post_karma = 0 AND p.require_reply = 0 AND p.post_text LIKE $like))";
+			$like = '%' . addcslashes((string) $word, '\\%_') . '%';
+			$conditions[] = '(p.subject LIKE ? OR (p.post_karma = 0 AND p.require_reply = 0 AND p.post_text LIKE ?))';
+			array_push($params, $like, $like);
 		}
 		$where .= ' AND (' . implode($andor === 'OR' ? ' OR ' : ' AND ', $conditions) . ')';
 	}
 
 	$hits = [];
-	$result = $db->query(
-		"SELECT p.post_id, p.topic_id, p.uid, p.post_time, p.subject FROM $posts p WHERE $where ORDER BY p.post_id DESC",
-		max(1, (int) $limit),
-		max(0, (int) $offset)
+	$rows = mod_imforum_Db::rows(
+		"SELECT p.post_id, p.topic_id, p.uid, p.post_time, p.subject FROM $posts p WHERE $where ORDER BY p.post_id DESC LIMIT ?, ?",
+		[...$params, max(0, (int) $offset), max(1, (int) $limit)]
 	);
-	while ($result && ($row = $db->fetchRow($result))) {
+	foreach ($rows as $row) {
 		$hits[] = [
 			'image' => 'images/imforum_iconsmall.png',
 			'link' => 'topic.php?topic=' . (int) $row[1] . '&post=' . (int) $row[0] . '#post-' . (int) $row[0],

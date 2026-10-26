@@ -47,6 +47,15 @@ class mod_imforum_SuspensionHandler extends icms_ipf_Handler {
 		return $this->getCount($where) > 0;
 	}
 
+	/**
+	 * Remove suspensions that ended before a moment
+	 */
+	public function purgeEndedBefore(int $time): int {
+		$count = $this->getCount(new icms_db_criteria_Item('end_time', $time, '<'));
+		$this->deleteAll(new icms_db_criteria_Item('end_time', $time, '<'));
+		return (int) $count;
+	}
+
 	protected function beforeInsert(mod_imforum_Suspension $suspension): bool {
 		if ((int) $suspension->getVar('start_time', 'e') === 0) {
 			$suspension->setVar('start_time', time());

@@ -26,10 +26,10 @@ class mod_imforum_ReportHandler extends icms_ipf_Handler {
 	 * Open reports about posts of one forum
 	 */
 	public function countOpenInForum(int $forumId): int {
-		$posts = $this->db->prefix(IMFORUM_DIRNAME . '_post');
-		$result = $this->db->queryF("SELECT COUNT(*) FROM {$this->table} r JOIN $posts p ON p.post_id = r.post_id WHERE r.report_result = " . mod_imforum_Report::RESULT_OPEN . " AND p.forum_id = $forumId");
-		$row = $result ? $this->db->fetchRow($result) : false;
-		return $row ? (int) $row[0] : 0;
+		return mod_imforum_Db::value(
+			"SELECT COUNT(*) FROM {$this->table} r JOIN " . mod_imforum_Db::table('post') . ' p ON p.post_id = r.post_id WHERE r.report_result = ? AND p.forum_id = ?',
+			[mod_imforum_Report::RESULT_OPEN, $forumId]
+		);
 	}
 
 	protected function beforeInsert(mod_imforum_Report $report): bool {

@@ -81,6 +81,16 @@ class mod_imforum_Notifier {
 	}
 
 	/**
+	 * Members who follow all forums for an event of the global category
+	 *
+	 * @return list<int>
+	 */
+	public function getGlobalSubscribers(string $event): array {
+		$moduleId = (int) icms_getModuleHandler('forum', IMFORUM_DIRNAME)->getModuleInfo()->getVar('mid');
+		return array_values(array_unique($this->getSubscribers($moduleId, 'global', 0, $event)));
+	}
+
+	/**
 	 * The category and event are names from icms_version.php, never request input
 	 *
 	 * @return list<int>

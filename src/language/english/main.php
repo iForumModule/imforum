@@ -128,3 +128,6 @@ define('_MD_IMFORUM_MOD_ERR_SPLIT_FIRST', 'The first post cannot start a new top
 define('_MD_IMFORUM_MOD_ERR_SUSPEND_WHO', 'Choose another member than yourself.');
 define('_MD_IMFORUM_MOD_ERR_SUSPEND_DAYS', 'Choose between 1 and %d days.');
 define('_MD_IMFORUM_MOD_ERR_SUSPEND_MOD', 'Moderators and webmasters cannot be suspended.');
+define('_MD_IMFORUM_DIGEST_NEW_TOPIC', 'new topic');
+define('_MD_IMFORUM_DIGEST_POSTS', '%d new posts');
+define('_MD_IMFORUM_DIGEST_MORE', 'And %d more topics:');

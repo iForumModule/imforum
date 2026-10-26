@@ -69,6 +69,13 @@ class mod_imforum_PostForm {
 		$form = new icms_ipf_form_Secure($form_post, 'imforum_post', $caption, mod_imforum_View::url('post'), null, $mode === 'edit' ? _MD_IMFORUM_SAVE : _MD_IMFORUM_POST);
 		$form->addCustomButton('preview_button', _MD_IMFORUM_PREVIEW);
 
+		// a WYSIWYG editor sends HTML: the post is then stored as HTML (shown through the purifier), without line break conversion
+		foreach ($form->getElements() as $element) {
+			if ($element instanceof icms_form_elements_Dhtmltextarea && $element->getName() === 'post_text' && is_object($element->htmlEditor)) {
+				self::add($form, new icms_form_elements_Hidden('wysiwyg', '1'));
+				break;
+			}
+		}
 		self::add($form, new icms_form_elements_Hidden('do', $mode));
 		self::add($form, new icms_form_elements_Hidden('forum', (string) $forum->id()));
 		if ($topic !== null) {

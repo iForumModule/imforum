@@ -25,7 +25,7 @@ class mod_imforum_Category extends icms_ipf_seo_Object {
 		$this->initCommonVar('weight');
 		$this->initiateSEO();
 
-		$this->setControl('cat_description', ['name' => 'textarea', 'form_editor' => 'default']);
+		$this->setControl('cat_description', ['name' => 'dhtmltextarea']);
 		$this->setControl('cat_image', ['name' => 'image']);
 	}
 

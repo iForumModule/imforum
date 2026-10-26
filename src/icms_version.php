@@ -19,8 +19,8 @@ include_once __DIR__ . '/include/common.php';
 $modversion = [
 	'name' => _MI_IMFORUM_NAME,
 	'version' => '1.0.0',
-	'status' => 'Alpha 5',
-	'status_version' => '1.0.0 Alpha 5',
+	'status' => 'Alpha 6',
+	'status_version' => '1.0.0 Alpha 6',
 	'date' => '25 October 2026',
 	'description' => _MI_IMFORUM_DESC,
 	'author' => 'fiammybe',
@@ -60,6 +60,13 @@ $modversion = [
 	'search' => ['file' => 'include/search.inc.php', 'func' => 'imforum_search'],
 	'hasComments' => 0,
 	'hasNotification' => 1,
+	// The core adds these to Systeem -> Autotasks when the module is installed or
+	// updated; the interval is in minutes and can be changed there.
+	'autotasks' => [
+		['enabled' => true, 'name' => _MI_IMFORUM_TASK_DIGEST, 'code' => 'include/autotask_digest.php', 'interval' => 1440],
+		['enabled' => true, 'name' => _MI_IMFORUM_TASK_CLEANUP, 'code' => 'include/autotask_cleanup.php', 'interval' => 1440],
+	],
+
 	'notification' => [
 		'lookup_file' => 'include/notification.inc.php',
 		'lookup_func' => 'imforum_notify_iteminfo',
@@ -107,6 +114,11 @@ $modversion = [
 				'name' => 'new_thread', 'category' => 'global',
 				'title' => _MI_IMFORUM_NOTIFY_GLOBAL_NEWTHREAD, 'caption' => _MI_IMFORUM_NOTIFY_GLOBAL_NEWTHREAD_CAP,
 				'description' => _MI_IMFORUM_NOTIFY_GLOBAL_NEWTHREAD_DSC, 'mail_template' => 'global_newthread', 'mail_subject' => _MI_IMFORUM_NOTIFY_GLOBAL_NEWTHREAD_SBJ,
+			],
+			[
+				'name' => 'digest', 'category' => 'global',
+				'title' => _MI_IMFORUM_NOTIFY_GLOBAL_DIGEST, 'caption' => _MI_IMFORUM_NOTIFY_GLOBAL_DIGEST_CAP,
+				'description' => _MI_IMFORUM_NOTIFY_GLOBAL_DIGEST_DSC, 'mail_template' => 'global_digest', 'mail_subject' => _MI_IMFORUM_NOTIFY_GLOBAL_DIGEST_SBJ,
 			],
 			[
 				'name' => 'new_post', 'category' => 'global',
@@ -276,6 +288,14 @@ $modversion = [
 			'formtype' => 'textarea',
 			'valuetype' => 'text',
 			'default' => '',
+		],
+		[
+			'name' => 'read_expire_days',
+			'title' => '_MI_IMFORUM_CFG_READ_EXPIRE',
+			'description' => '_MI_IMFORUM_CFG_READ_EXPIRE_DSC',
+			'formtype' => 'textbox',
+			'valuetype' => 'int',
+			'default' => 90,
 		],
 	],
 ];
