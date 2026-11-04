@@ -3,7 +3,7 @@
  * Rows for the lists of topics on the forum page and the overview pages
  *
  * @copyright	The iForum project
- * @license		MIT, see LICENSE
+ * @license		GNU GPL v2, see LICENSE
  * @package		imforum
  * @since		1.0
  */

@@ -5,7 +5,7 @@
  * The digest task (phase 6) writes them; there is no "add" here.
  *
  * @copyright	The iForum project
- * @license		MIT, see LICENSE
+ * @license		GNU GPL v2, see LICENSE
  * @package		imforum
  * @since		1.0
  */

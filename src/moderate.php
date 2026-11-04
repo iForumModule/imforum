@@ -9,7 +9,7 @@
  * &post=N. do=handle&report=N closes a report.
  *
  * @copyright	The iForum project
- * @license		MIT, see LICENSE
+ * @license		GNU GPL v2, see LICENSE
  * @package		imforum
  * @since		1.0
  */

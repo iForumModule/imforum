@@ -7,7 +7,7 @@
  * namespace mod_imforum and builds the tables from the object definitions.
  *
  * @copyright	The iForum project
- * @license		MIT, see LICENSE
+ * @license		GNU GPL v2, see LICENSE
  * @package		imforum
  * @since		1.0
  */
@@ -26,7 +26,7 @@ $modversion = [
 	'author' => 'fiammybe',
 	'author_realname' => 'David Janssens',
 	'credits' => 'Based on the ideas of iForum, CBB and newbb',
-	'license' => 'MIT, see LICENSE',
+	'license' => 'GNU GPL v2, see LICENSE',
 	'official' => false,
 	'dirname' => basename(__DIR__),
 	'modname' => IMFORUM_DIRNAME,

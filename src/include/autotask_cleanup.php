@@ -5,7 +5,7 @@
  * The core includes this file from inside a task object; it only calls the cleanup.
  *
  * @copyright	The iForum project
- * @license		MIT, see LICENSE
+ * @license		GNU GPL v2, see LICENSE
  * @package		imforum
  * @since		1.0
  */

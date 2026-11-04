@@ -3,7 +3,7 @@
  * A digest: the list of featured topics sent by mail
  *
  * @copyright	The iForum project
- * @license		MIT, see LICENSE
+ * @license		GNU GPL v2, see LICENSE
  * @package		imforum
  * @since		1.0
  */

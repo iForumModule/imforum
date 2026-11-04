@@ -7,7 +7,7 @@
  * subject only, so the search cannot be used to read around the rule.
  *
  * @copyright	The iForum project
- * @license		MIT, see LICENSE
+ * @license		GNU GPL v2, see LICENSE
  * @package		imforum
  * @since		1.0
  */

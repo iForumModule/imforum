@@ -41,4 +41,4 @@ Conventions:
 
 ## License
 
-MIT, see [LICENSE](LICENSE).
+GNU General Public License version 2, see [LICENSE](LICENSE). imforum is the successor of iForum, which is released under the same license.

@@ -2,7 +2,7 @@
     "name": "iforummodule/imforum",
     "description": "Community forum module for ImpressCMS 2.0, built on the ImpressCMS Persistable Framework",
     "type": "project",
-    "license": "MIT",
+    "license": "GPL-2.0-only",
     "require": {
         "php": ">=8.2"
     },
