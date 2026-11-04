@@ -79,6 +79,7 @@ require_once __DIR__ . '/Integration/CoreConfig.php';
 icms::$config = new \Imforum\Tests\Integration\CoreConfig();
 icms::$preload = icms_preload_Handler::getInstance();
 icms::$logger = icms_core_Logger::instance();
+icms::$db = icms_db_Factory::pdoInstance();
 icms::$xoopsDB = icms_db_Factory::instance();
 
 foreach (['global', 'core', 'databaseupdater'] as $file) {

@@ -6,7 +6,7 @@
  * permissions. iForum kept the template in a cache file; here it is a table.
  *
  * @copyright	The iForum project
- * @license		MIT, see LICENSE
+ * @license		GNU GPL v2, see LICENSE
  * @package		imforum
  * @since		1.0
  */

@@ -3,7 +3,7 @@
  * A forum holds topics and can sit below another forum
  *
  * @copyright	The iForum project
- * @license		MIT, see LICENSE
+ * @license		GNU GPL v2, see LICENSE
  * @package		imforum
  * @since		1.0
  */
@@ -46,7 +46,7 @@ class mod_imforum_Forum extends icms_ipf_seo_Object {
 
 		$this->setControl('cat_id', ['itemHandler' => 'category', 'method' => 'getCategorySelectList', 'module' => IMFORUM_DIRNAME]);
 		$this->setControl('parent_forum', ['itemHandler' => 'forum', 'method' => 'getParentSelectList', 'module' => IMFORUM_DIRNAME]);
-		$this->setControl('forum_desc', ['name' => 'textarea', 'form_editor' => 'default']);
+		$this->setControl('forum_desc', ['name' => 'dhtmltextarea']);
 		foreach (['forum_active', 'allow_html', 'allow_sig', 'allow_subject_prefix'] as $key) {
 			$this->setControl($key, ['name' => 'yesno']);
 		}

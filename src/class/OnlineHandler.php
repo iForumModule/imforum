@@ -3,7 +3,7 @@
  * Handler for the who-is-online list
  *
  * @copyright	The iForum project
- * @license		MIT, see LICENSE
+ * @license		GNU GPL v2, see LICENSE
  * @package		imforum
  * @since		1.0
  */
@@ -98,6 +98,6 @@ class mod_imforum_OnlineHandler extends icms_ipf_Handler {
 	 * Drop rows that were not updated since a moment
 	 */
 	public function purgeOlderThan(int $time): bool {
-		return (bool) $this->db->queryF(sprintf('DELETE FROM %s WHERE updated < %d', $this->table, $time));
+		return mod_imforum_Db::ok("DELETE FROM {$this->table} WHERE updated < ?", [$time]);
 	}
 }

@@ -7,7 +7,7 @@
  * namespace mod_imforum and builds the tables from the object definitions.
  *
  * @copyright	The iForum project
- * @license		MIT, see LICENSE
+ * @license		GNU GPL v2, see LICENSE
  * @package		imforum
  * @since		1.0
  */
@@ -19,14 +19,14 @@ include_once __DIR__ . '/include/common.php';
 $modversion = [
 	'name' => _MI_IMFORUM_NAME,
 	'version' => '1.0.0',
-	'status' => 'Alpha',
-	'status_version' => '1.0.0 Alpha',
+	'status' => 'Alpha 8',
+	'status_version' => '1.0.0 Alpha 8',
 	'date' => '25 October 2026',
 	'description' => _MI_IMFORUM_DESC,
 	'author' => 'fiammybe',
 	'author_realname' => 'David Janssens',
 	'credits' => 'Based on the ideas of iForum, CBB and newbb',
-	'license' => 'MIT, see LICENSE',
+	'license' => 'GNU GPL v2, see LICENSE',
 	'official' => false,
 	'dirname' => basename(__DIR__),
 	'modname' => IMFORUM_DIRNAME,
@@ -60,6 +60,13 @@ $modversion = [
 	'search' => ['file' => 'include/search.inc.php', 'func' => 'imforum_search'],
 	'hasComments' => 0,
 	'hasNotification' => 1,
+	// The core adds these to Systeem -> Autotasks when the module is installed or
+	// updated; the interval is in minutes and can be changed there.
+	'autotasks' => [
+		['enabled' => true, 'name' => _MI_IMFORUM_TASK_DIGEST, 'code' => 'include/autotask_digest.php', 'interval' => 1440],
+		['enabled' => true, 'name' => _MI_IMFORUM_TASK_CLEANUP, 'code' => 'include/autotask_cleanup.php', 'interval' => 1440],
+	],
+
 	'notification' => [
 		'lookup_file' => 'include/notification.inc.php',
 		'lookup_func' => 'imforum_notify_iteminfo',
@@ -109,6 +116,11 @@ $modversion = [
 				'description' => _MI_IMFORUM_NOTIFY_GLOBAL_NEWTHREAD_DSC, 'mail_template' => 'global_newthread', 'mail_subject' => _MI_IMFORUM_NOTIFY_GLOBAL_NEWTHREAD_SBJ,
 			],
 			[
+				'name' => 'digest', 'category' => 'global',
+				'title' => _MI_IMFORUM_NOTIFY_GLOBAL_DIGEST, 'caption' => _MI_IMFORUM_NOTIFY_GLOBAL_DIGEST_CAP,
+				'description' => _MI_IMFORUM_NOTIFY_GLOBAL_DIGEST_DSC, 'mail_template' => 'global_digest', 'mail_subject' => _MI_IMFORUM_NOTIFY_GLOBAL_DIGEST_SBJ,
+			],
+			[
 				'name' => 'new_post', 'category' => 'global',
 				'title' => _MI_IMFORUM_NOTIFY_GLOBAL_NEWPOST, 'caption' => _MI_IMFORUM_NOTIFY_GLOBAL_NEWPOST_CAP,
 				'description' => _MI_IMFORUM_NOTIFY_GLOBAL_NEWPOST_DSC, 'mail_template' => 'global_newpost', 'mail_subject' => _MI_IMFORUM_NOTIFY_GLOBAL_NEWPOST_SBJ,
@@ -123,6 +135,7 @@ $modversion = [
 		['file' => 'imforum_forum.html', 'description' => 'Forum with its topics'],
 		['file' => 'imforum_topic.html', 'description' => 'Topic with its posts'],
 		['file' => 'imforum_post.html', 'description' => 'Form to write, edit or delete a post'],
+		['file' => 'imforum_moderate.html', 'description' => 'Moderation forms, the queue of waiting posts and the reports'],
 		['file' => 'imforum_viewall.html', 'description' => 'Topics of all forums'],
 		['file' => 'imforum_archive.html', 'description' => 'Archived topics'],
 		['file' => 'imforum_breadcrumb.html', 'description' => 'Path above a page'],
@@ -275,6 +288,14 @@ $modversion = [
 			'formtype' => 'textarea',
 			'valuetype' => 'text',
 			'default' => '',
+		],
+		[
+			'name' => 'read_expire_days',
+			'title' => '_MI_IMFORUM_CFG_READ_EXPIRE',
+			'description' => '_MI_IMFORUM_CFG_READ_EXPIRE_DSC',
+			'formtype' => 'textbox',
+			'valuetype' => 'int',
+			'default' => 90,
 		],
 	],
 ];

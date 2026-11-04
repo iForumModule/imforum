@@ -3,7 +3,7 @@
  * Handler for suspensions
  *
  * @copyright	The iForum project
- * @license		MIT, see LICENSE
+ * @license		GNU GPL v2, see LICENSE
  * @package		imforum
  * @since		1.0
  */
@@ -45,6 +45,15 @@ class mod_imforum_SuspensionHandler extends icms_ipf_Handler {
 		$where->add($who);
 
 		return $this->getCount($where) > 0;
+	}
+
+	/**
+	 * Remove suspensions that ended before a moment
+	 */
+	public function purgeEndedBefore(int $time): int {
+		$count = $this->getCount(new icms_db_criteria_Item('end_time', $time, '<'));
+		$this->deleteAll(new icms_db_criteria_Item('end_time', $time, '<'));
+		return (int) $count;
 	}
 
 	protected function beforeInsert(mod_imforum_Suspension $suspension): bool {

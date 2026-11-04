@@ -5,7 +5,7 @@
  * The blocks show only what the visitor may read.
  *
  * @copyright	The iForum project
- * @license		MIT, see LICENSE
+ * @license		GNU GPL v2, see LICENSE
  * @package		imforum
  * @since		1.0
  */

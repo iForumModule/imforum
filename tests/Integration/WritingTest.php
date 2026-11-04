@@ -150,6 +150,14 @@ final class WritingTest extends IntegrationTestCase
 		self::assertSame([], $notifier->calls, 'nobody is told about a post nobody can read');
 	}
 
+	public function testAnEditorPostIsStoredAsHtmlWithoutLineBreakConversion(): void
+	{
+		$post = $this->service()->createTopic($this->forumObject(), self::input() + ['wysiwyg' => 1, 'dobr' => 1])['post'];
+
+		self::assertSame(1, (int) $post->getVar('dohtml', 'e'), 'the editor sends HTML, shown through the purifier');
+		self::assertSame(0, (int) $post->getVar('dobr', 'e'));
+	}
+
 	public function testWhatTheFormMayNotSetIsIgnored(): void
 	{
 		$input = self::input() + ['dohtml' => 1, 'attachsig' => 1, 'post_karma' => 999999, 'require_reply' => 1, 'uid' => 99, 'approved' => 0, 'forum_id' => 77, 'topic_id' => 77];

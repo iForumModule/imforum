@@ -3,7 +3,7 @@
  * Handler for reports
  *
  * @copyright	The iForum project
- * @license		MIT, see LICENSE
+ * @license		GNU GPL v2, see LICENSE
  * @package		imforum
  * @since		1.0
  */
@@ -20,6 +20,16 @@ class mod_imforum_ReportHandler extends icms_ipf_Handler {
 
 	public function getOpenCount(): int {
 		return (int) $this->getCount(new icms_db_criteria_Item('report_result', mod_imforum_Report::RESULT_OPEN));
+	}
+
+	/**
+	 * Open reports about posts of one forum
+	 */
+	public function countOpenInForum(int $forumId): int {
+		return mod_imforum_Db::value(
+			"SELECT COUNT(*) FROM {$this->table} r JOIN " . mod_imforum_Db::table('post') . ' p ON p.post_id = r.post_id WHERE r.report_result = ? AND p.forum_id = ?',
+			[mod_imforum_Report::RESULT_OPEN, $forumId]
+		);
 	}
 
 	protected function beforeInsert(mod_imforum_Report $report): bool {

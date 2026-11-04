@@ -11,12 +11,14 @@ define('ICMS_ROOT_PATH', $core);
 define('ICMS_URL', 'http://localhost');
 define('ICMS_UPLOAD_PATH', $core . '/uploads');
 define('ICMS_UPLOAD_URL', 'http://localhost/uploads');
+define('XOOPS_DB_PREFIX', 'icms');
 define('ICMS_GROUP_ADMIN', 1);
 define('ICMS_GROUP_USERS', 2);
 define('ICMS_GROUP_ANONYMOUS', 3);
 
 // set by the core's include/common.php at runtime
 define('_GLOBAL_LEFT', 'left');
+define('XOOPS_CACHE_PATH', '/tmp/cache');
 // from the core's language/<language>/global.php
 define('_NOPERM', 'Sorry, you don\'t have the permission to access this area.');
 // the _CO_ICMS_* strings of the IPF forms and tables

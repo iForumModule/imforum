@@ -8,7 +8,7 @@
  * language constants, ready for output.
  *
  * @copyright	The iForum project
- * @license		MIT, see LICENSE
+ * @license		GNU GPL v2, see LICENSE
  * @package		imforum
  * @since		1.0
  */
@@ -246,11 +246,11 @@ class mod_imforum_PostService {
 			'attachsig' => $member && (int) $forum->getVar('allow_sig', 'e') === 1 ? $flag('attachsig') : 0,
 			'post_karma' => $karma,
 			'require_reply' => $member ? $flag('require_reply') : 0,
-			'dohtml' => (int) $forum->getVar('allow_html', 'e') === 1 ? $flag('dohtml') : 0,
+			'dohtml' => $flag('wysiwyg') === 1 || ((int) $forum->getVar('allow_html', 'e') === 1 && $flag('dohtml') === 1) ? 1 : 0,
 			'dosmiley' => $flag('dosmiley'),
 			'doxcode' => $flag('doxcode'),
 			'doimage' => $flag('doimage'),
-			'dobr' => $flag('dobr'),
+			'dobr' => $flag('wysiwyg') === 1 ? 0 : $flag('dobr'),
 		], $errors];
 	}
 

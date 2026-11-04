@@ -6,7 +6,7 @@
  * 43,778 posts on the largest site a separate table buys nothing.
  *
  * @copyright	The iForum project
- * @license		MIT, see LICENSE
+ * @license		GNU GPL v2, see LICENSE
  * @package		imforum
  * @since		1.0
  */
@@ -50,7 +50,7 @@ class mod_imforum_Post extends icms_ipf_Object {
 
 		$this->hideFieldFromForm(['topic_id', 'forum_id', 'pid', 'uid', 'poster_ip', 'post_time', 'post_edit', 'approved']);
 
-		$this->setControl('post_text', ['name' => 'textarea', 'form_editor' => 'default']);
+		$this->setControl('post_text', ['name' => 'dhtmltextarea']);
 		foreach (['attachsig', 'require_reply'] as $key) {
 			$this->setControl($key, ['name' => 'yesno']);
 		}

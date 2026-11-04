@@ -8,7 +8,7 @@
  * a few picture types is sent as a download, never rendered by the browser.
  *
  * @copyright	The iForum project
- * @license		MIT, see LICENSE
+ * @license		GNU GPL v2, see LICENSE
  * @package		imforum
  * @since		1.0
  */

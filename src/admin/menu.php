@@ -3,7 +3,7 @@
  * Administration menu
  *
  * @copyright	The iForum project
- * @license		MIT, see LICENSE
+ * @license		GNU GPL v2, see LICENSE
  * @package		imforum
  * @since		1.0
  */
@@ -23,6 +23,7 @@ foreach ([
 	'digest' => _MI_IMFORUM_MENU_DIGESTS,
 	'archive' => _MI_IMFORUM_MENU_ARCHIVE,
 	'prune' => _MI_IMFORUM_MENU_PRUNE,
+	'import' => _MI_IMFORUM_MENU_IMPORT,
 ] as $script => $title) {
 	$adminmenu[] = [
 		'title' => $title,

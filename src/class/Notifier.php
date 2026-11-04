@@ -7,7 +7,7 @@
  * cannot be bypassed through a mailbox.
  *
  * @copyright	The iForum project
- * @license		MIT, see LICENSE
+ * @license		GNU GPL v2, see LICENSE
  * @package		imforum
  * @since		1.0
  */
@@ -78,6 +78,16 @@ class mod_imforum_Notifier {
 			}
 		}
 		return $readers;
+	}
+
+	/**
+	 * Members who follow all forums for an event of the global category
+	 *
+	 * @return list<int>
+	 */
+	public function getGlobalSubscribers(string $event): array {
+		$moduleId = (int) icms_getModuleHandler('forum', IMFORUM_DIRNAME)->getModuleInfo()->getVar('mid');
+		return array_values(array_unique($this->getSubscribers($moduleId, 'global', 0, $event)));
 	}
 
 	/**

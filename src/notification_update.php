@@ -5,7 +5,7 @@
  * The form of the core posts to the folder of the module it was shown in.
  *
  * @copyright	The iForum project
- * @license		MIT, see LICENSE
+ * @license		GNU GPL v2, see LICENSE
  * @package		imforum
  * @since		1.0
  */

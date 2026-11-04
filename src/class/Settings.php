@@ -6,7 +6,7 @@
  * outside the module's own pages, where icms::$module is another module.
  *
  * @copyright	The iForum project
- * @license		MIT, see LICENSE
+ * @license		GNU GPL v2, see LICENSE
  * @package		imforum
  * @since		1.0
  */
@@ -32,6 +32,7 @@ class mod_imforum_Settings {
 		'subject_prefix' => '',
 		'disclaimer_show' => 0,
 		'disclaimer' => '',
+		'read_expire_days' => 90,
 	];
 
 	/** @var array<string, mixed>|null */
